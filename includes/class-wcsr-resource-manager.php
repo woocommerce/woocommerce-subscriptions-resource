@@ -35,7 +35,7 @@ class WCSR_Resource_Manager {
 	/**
 	 * Create a new resource with a given status, and linked to a given external object and subscription.
 	 *
-	 * @param string The status for the resource, either 'active' or 'on-hold'.
+	 * @param string The status for the resource, either 'active' or 'inactive'.
 	 * @param int The ID of the external object to link this resource to.
 	 * @param int The ID of a subscription to link this resource to.
 	 * @param array Set of optional additional data to customise the resource.
@@ -46,6 +46,7 @@ class WCSR_Resource_Manager {
 		$args = wp_parse_args( $args, array(
 			'is_pre_paid'  => true,
 			'is_prorated'  => false,
+			'date_created' => gmdate( 'U' ),
 			)
 		);
 
@@ -53,12 +54,17 @@ class WCSR_Resource_Manager {
 		$resource_class = self::get_resource_class( $resource_id );
 		$resource       = new $resource_class( $resource_id );
 
-		$resource->set_status( $status );
 		$resource->set_external_id( $external_id );
 		$resource->set_subscription_id( $subscription_id );
 
 		$resource->set_is_pre_paid( $args['is_pre_paid'] );
 		$resource->set_is_prorated( $args['is_prorated'] );
+		$resource->set_date_created( $args['date_created'] );
+
+		// If the resource is being created as an active resource, make sure its creation time is included in the activation timestamps
+		if ( 'active' === $status ) {
+			$resource->set_activation_timestamps( array( $args['date_created'] ) );
+		}
 
 		WCSR_Data_Store::store()->create( $resource );
 

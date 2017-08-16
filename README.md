@@ -39,7 +39,7 @@ This can be done with the following hooks:
 
 To create a new resource, trigger the `wcsr_create_resource` hook via `do_action()` and pass the following parameters:
 
-1. `$status` (`string`):  the status for the resource at the tie of creation. Should be either 'active' or 'on-hold' unless using a custom resource class which can handle other statuses.
+1. `$status` (`string`):  the status for the resource at the time of creation. Should be either 'active' or 'inactive', unless using a custom resource class which can handle other statuses.
 1. `$external_id` (`int`):  the ID of the external object to link this resource to. For example, to link it to a _store_ on [Robot Ninja](http://robotninja.com/), the store's ID is passed as the `$external_id`.
 1. `$subscription_id` (`int`):  the ID of the subscription in WooCommerce to link this resource to.
 1. `$args` (`array`): A set of params to customise the behaviour of the resource, especially for proration and pre-pay vs. post pay. Default value: `array ( 'is_pre_paid'  => true, 'is_prorated'  => false )`.

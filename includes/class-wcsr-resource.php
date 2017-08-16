@@ -25,7 +25,6 @@ class WCSR_Resource extends WC_Data {
 	 */
 	protected $data = array(
 		'date_created'            => null,
-		'status'                  => '',
 		'external_id'             => 0,
 		'subscription_id'         => 0,
 		'is_pre_paid'             => true,
@@ -97,7 +96,6 @@ class WCSR_Resource extends WC_Data {
 	 * Record the resource's activation
 	 */
 	public function activate() {
-		$this->set_status( 'active' );
 
 		$activation_timestamps   = $this->get_activation_timestamps();
 		$activation_timestamps[] = gmdate( 'U' );
@@ -109,26 +107,11 @@ class WCSR_Resource extends WC_Data {
 	 * Record the resource's deactivation
 	 */
 	public function deactivate() {
-		$this->set_status( 'on-hold' );
 
 		$deactivation_timestamps   = $this->get_deactivation_timestamps();
 		$deactivation_timestamps[] = gmdate( 'U' );
 
 		$this->set_deactivation_timestamps( $deactivation_timestamps );
-	}
-
-	/**
-	 * Update the resource's status
-	 */
-	public function get_status( $context = 'view' ) {
-		$status = $this->get_prop( 'status', $context );
-
-		if ( empty( $status ) && 'view' === $context ) {
-			// In view context, return the default status if no status has been set.
-			$status = apply_filters( 'wcsr_default_resource_status', 'on-hold' );
-		}
-
-		return $status;
 	}
 
 	/**
@@ -243,39 +226,6 @@ class WCSR_Resource extends WC_Data {
 	 */
 
 	/**
-	 * Set resource status.
-	 *
-	 * @since 1.0.0
-	 * @param string $new_status Status to change the resource to. Either 'active' or 'on-hold'. No internal wc- prefix is required.
-	 * @return array details of change
-	 */
-	public function set_status( $status ) {
-		$old_status = $this->get_status();
-		$new_status = 'wc-' === substr( $new_status, 0, 3 ) ? substr( $new_status, 3 ) : $new_status;
-
-		// If setting the status, ensure it's set to a valid status.
-		if ( true === $this->object_read ) {
-
-			// Only allow valid new status
-			if ( ! in_array( 'wc-' . $new_status, $this->get_valid_statuses() ) && 'trash' !== $new_status ) {
-				$new_status = 'on-hold';
-			}
-
-			// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
-			if ( $old_status && ! in_array( 'wc-' . $old_status, $this->get_valid_statuses() ) && 'trash' !== $old_status ) {
-				$old_status = 'on-hold';
-			}
-		}
-
-		$this->set_prop( 'status', $new_status );
-
-		return array(
-			'from' => $old_status,
-			'to'   => $new_status,
-		);
-	}
-
-	/**
 	 * The ID of the object in the external system (i.e. system outside Subscriptions) this resource is linked to.
 	 *
 	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
@@ -337,18 +287,5 @@ class WCSR_Resource extends WC_Data {
 	 */
 	public function set_deactivation_timestamps( $timestamps ) {
 		$this->set_prop( 'deactivation_timestamps', $timestamps );
-	}
-
-	/**
-	 * Get all valid statuses for this resource type
-	 *
-	 * @since 1.0.0
-	 * @return array Internal status keys e.g. 'wc-active'
-	 */
-	protected function get_valid_statuses() {
-		return array(
-			'wc-active',
-			'wc-on-hold',
-		);
 	}
 }
