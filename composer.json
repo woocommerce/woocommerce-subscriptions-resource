@@ -1,0 +1,9 @@
+{
+  "name": "prospress/woocommerce-subscriptions-resource",
+  "version": "1.5.3",
+  "description": "A generic resource class to track and prorate payments for a subscription using WooCommerce Subscriptions.",
+  "type": "wordpress-plugin",
+  "license": "GPL-3.0",
+  "minimum-stability": "dev",
+  "require": {}
+}
