@@ -119,7 +119,7 @@ class WCSR_Resource_Manager {
 
 				$resource = self::get_resource( $resource_id );
 
-				if ( ! empty( $resource ) && false === $resource->get_is_pre_paid() && $resource->get_is_prorated() ) {
+				if ( ! empty( $resource ) && false === $resource->get_is_pre_paid() && $resource->get_is_prorated() && $resource->has_been_activated() ) {
 
 					// Maybe ignore the first active resource if it is accounted for with the existing line item/s
 					if ( false === $first_resource_ignored && apply_filters( 'wcsr_charge_one_full_price_resource', true ) ) {

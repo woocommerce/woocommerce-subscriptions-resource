@@ -175,6 +175,10 @@ class WCSR_Resource extends WC_Data {
 	 */
 	public function get_days_active( $from_timestamp, $to_timestamp = null ) {
 
+		if ( false === $this->has_been_activated() ) {
+			return 0;
+		}
+
 		if ( is_null( $to_timestamp ) ) {
 			$to_timestamp = gmdate( 'U' );
 		}
@@ -219,6 +223,18 @@ class WCSR_Resource extends WC_Data {
 		}
 
 		return $times;
+	}
+
+	/**
+	 * Determine if the resource has ever been activated by checking whether it has at least one activation timestamp
+	 *
+	 * @return bool
+	 */
+	public function has_been_activated() {
+
+		$activation_timestamps = $this->get_activation_timestamps();
+
+		return empty( $activation_timestamps ) ? false : true;
 	}
 
 	/**
