@@ -80,9 +80,11 @@ class WCSR_Resource_Manager {
 	 * @return null
 	 */
 	public static function activate_resource( $external_id ) {
-		$resource = self::get_resource( WCSR_Data_Store::store()->get_resource_id_by_external_id( $external_id ) );
-		$resource->activate();
-		$resource->save();
+		if ( $resource_id = WCSR_Data_Store::store()->get_resource_id_by_external_id( $external_id ) ) {
+			$resource = self::get_resource( $resource_id );
+			$resource->activate();
+			$resource->save();
+		}
 	}
 
 	/**
@@ -92,9 +94,11 @@ class WCSR_Resource_Manager {
 	 * @return null
 	 */
 	public static function deactivate_resource( $external_id ) {
-		$resource = self::get_resource( WCSR_Data_Store::store()->get_resource_id_by_external_id( $external_id ) );
-		$resource->deactivate();
-		$resource->save();
+		if ( $resource_id = WCSR_Data_Store::store()->get_resource_id_by_external_id( $external_id ) ) {
+			$resource = self::get_resource( $resource_id );
+			$resource->deactivate();
+			$resource->save();
+		}
 	}
 
 	/**

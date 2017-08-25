@@ -152,7 +152,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 
 		$resource->set_object_read( true );
 
-		do_action( 'wcsr_resouce_loaded', $resource );
+		do_action( 'wcsr_resource_loaded', $resource );
 	}
 
 	/**
@@ -253,7 +253,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 	 */
 	public function get_resource_id_by_external_id( $external_id ) {
 
-		$resource_post_id = get_posts( array(
+		$resource_post_ids = get_posts( array(
 			'posts_per_page' => 1,
 			'post_type'      => $this->post_type,
 			'post_status'    => 'any',
@@ -267,6 +267,8 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 				),
 			),
 		) );
+
+		$resource_post_id = empty( $resource_post_ids ) ? false : array_pop( $resource_post_ids );
 
 		return $resource_post_id;
 	}
