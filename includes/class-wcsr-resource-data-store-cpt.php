@@ -268,7 +268,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 			),
 		) );
 
-		$resource_post_id = empty( $resource_post_ids ) ? false : array_pop( $resource_post_id );
+		$resource_post_id = empty( $resource_post_ids ) ? false : array_pop( $resource_post_ids );
 
 		return $resource_post_id;
 	}
