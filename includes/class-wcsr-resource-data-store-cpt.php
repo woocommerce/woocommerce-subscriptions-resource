@@ -152,7 +152,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 
 		$resource->set_object_read( true );
 
-		do_action( 'wcsr_resouce_loaded', $resource );
+		do_action( 'wcsr_resource_loaded', $resource );
 	}
 
 	/**
