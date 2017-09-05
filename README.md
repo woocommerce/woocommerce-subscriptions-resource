@@ -81,6 +81,53 @@ To deactive a resource linked to a store with ID 23, the following code can be u
 do_action( 'wcsr_deactivate_resource', 23 );
 ```
 
+### Add custom line items or modify prorated totals
+
+If you want to customize the prorated amounts, or apply other logic to orders that have been prorated, like adding other line items, the `'wcsr_after_renewal_order_prorated'` hook is triggered after a renewal order's totals have been prorated.
+
+For example, we use this on Robot Ninja to implmement a minimum amount for renewal orders of $9 by adding custom fee line items to orders with a prorated total of less than $9.
+
+Callbacks on the `wcsr_after_renewal_order_prorated` filter receive:
+
+1. an `WC_Order` object representing the prorated renewal order as the first param.
+2. an array of resource IDs for the matching subscription as the 2nd param.
+
+> Note: this filter is only trigger for orders with prorated amounts, making it easier to use then existing, more generic hooks, like `'wcs_renewal_order_created'`.
+
+#### Custom Resource Line Item Name Example
+
+The following snippet shows code similar to that used on Robot Ninja to enforce a minimum monthly access fee of $9. If the prorated renewal order is less than $9 based on the resource usage during the prior month, then a new fee line item is added to the renewal order for difference.
+
+```php
+public function eg_add_minimum_fee( $renewal_order, $resource_ids ) {
+
+	if ( $renewal_order->get_total() < 9 ) {
+
+		$fee_item = new WC_Order_Item_Fee();
+
+		$fee_item->set_props( array(
+			'name'      => 'Robot Ninja Gap Fee for Monthly Minimum',
+			'tax_class' => '',
+			'total'     => wc_format_decimal( 9.00 - $renewal_order->get_total() ),
+			'total_tax' => '',
+			'taxes'     => array(
+				'total' => 0,
+			),
+			'order_id'  => $renewal_order->get_id(),
+		) );
+
+		$item->save();
+
+		$renewal_order->add_item( $item );
+
+		$renewal_order->calculate_totals(); // also saves the order
+	}
+
+	return $renewal_order;
+}
+add_filter( 'wcsr_after_renewal_order_prorated', ''eg_add_minimum_fee, 10, 2 );_
+```
+
 ### Link a Resource to Line Item Name on Renewal Order
 
 Each resource will be set as a separate line item on the renewal orders (using the correct product IDs to make sure reports are accurate).
