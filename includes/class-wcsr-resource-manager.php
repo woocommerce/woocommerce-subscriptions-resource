@@ -113,7 +113,7 @@ class WCSR_Resource_Manager {
 		$is_prorated  = false;
 		$resource_ids = WCSR_Data_Store::store()->get_resource_ids_for_subscription( $subscription->get_id() );
 
-		if ( ! empty( $resource_ids ) && count( $resource_ids ) > 1 ) {
+		if ( ! empty( $resource_ids ) ) {
 
 			// First, get the line items representing the resource so we can figure out things like cost for it
 			$line_items = $renewal_order->get_items();
