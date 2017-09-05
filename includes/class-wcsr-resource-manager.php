@@ -117,19 +117,11 @@ class WCSR_Resource_Manager {
 			// First, get the line items representing the resource so we can figure out things like cost for it
 			$line_items = $renewal_order->get_items();
 
-			$first_resource_ignored = false;
-
 			foreach ( $resource_ids as $resource_id ) {
 
 				$resource = self::get_resource( $resource_id );
 
 				if ( ! empty( $resource ) && false === $resource->get_is_pre_paid() && $resource->get_is_prorated() && $resource->has_been_activated() ) {
-
-					// Maybe ignore the first active resource if it is accounted for with the existing line item/s
-					if ( false === $first_resource_ignored && apply_filters( 'wcsr_charge_one_full_price_resource', true ) ) {
-						$first_resource_ignored = true;
-						continue;
-					}
 
 					// Calculate prorated payments from paid date to match how Subscriptions determine next payment dates.
 					if ( $subscription->get_time( 'last_order_date_paid' ) > 0 ) {
