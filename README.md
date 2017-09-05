@@ -157,7 +157,7 @@ add_filter( 'wcsr_renewal_line_item_name', 'eg_add_store_to_line_item', 10, 4 );
 
 ### Do the subscription's line item totals display updated amounts each day to account for proration?
 
-No. For now, the subscription line item totals will only display whatever line items were set on it at the time of sign-up.
+No. For now, on the customer facing **My Account > View Subscription** and admin facing **WooCommerce > Edit Subscription** screens, the subscription line item totals will only display whatever line items were set on it at the time of sign-up.
 
 These totals are then used at the time of renewal to determine the prorated amount.
 
