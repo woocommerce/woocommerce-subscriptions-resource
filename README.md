@@ -10,10 +10,7 @@ Resources can be pre-paid or post-paid. They can be prorated to daily rates, or 
 
 By default, proration for resources works very similar to [Slack's billing](https://get.slack.help/hc/en-us/articles/218915077), because we thought it was cool, and very fair, so wanted to use it for Robot Ninja.
 
-Specifically:
-
-* Any changes to the number of active resources will be reflected in the next renewal order, prorated daily.
-* If all resources are inactive, the renewal will still charge for a minimum of one resource.
+Specifically, any changes to the number of active resources will be reflected in the next renewal order, prorated daily.
 
 Here’s an example:
 
