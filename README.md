@@ -116,9 +116,9 @@ public function eg_add_minimum_fee( $renewal_order, $resource_ids ) {
 			'order_id'  => $renewal_order->get_id(),
 		) );
 
-		$item->save();
+		$fee_item->save();
 
-		$renewal_order->add_item( $item );
+		$renewal_order->add_item( $fee_item );
 
 		$renewal_order->calculate_totals(); // also saves the order
 	}
