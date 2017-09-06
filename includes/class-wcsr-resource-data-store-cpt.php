@@ -229,14 +229,16 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 	 * Get the IDs of all resources from the database for a given subscription/order
 	 *
 	 * @param int $order_id
+	 * @param string $status
 	 * @return array
 	 */
-	public function get_resource_ids_for_subscription( $subscription_id ) {
+	public function get_resource_ids_for_subscription( $subscription_id, $status = 'unended' ) {
+		$status = ( empty( $status ) || ! in_array( $status, WCSR_Resource::get_valid_statuses() ) ) ? 'any' : $status;
 
 		$resource_post_ids = get_posts( array(
 			'posts_per_page' => -1,
 			'post_type'      => $this->post_type,
-			'post_status'    => 'any',
+			'post_status'    => $status,
 			'post_parent'    => $subscription_id,
 			'fields'         => 'ids',
 			'orderby'        => 'ID',
@@ -250,15 +252,17 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 	 * Get the post ID of the resource from the database for a given resouce (using the ID of the resource in
 	 * the 3rd party system, not post ID for it)
 	 *
-	 * @param int $external_id
-	 * @return array
+	 * @param int    $external_id
+	 * @param string $status
+	 * @return int
 	 */
-	public function get_resource_id_by_external_id( $external_id ) {
+	public function get_resource_id_by_external_id( $external_id, $status = 'unended' ) {
+		$status = ( empty( $status ) || ! in_array( $status, WCSR_Resource::get_valid_statuses() ) ) ? 'any' : $status;
 
 		$resource_post_ids = get_posts( array(
 			'posts_per_page' => 1,
 			'post_type'      => $this->post_type,
-			'post_status'    => 'any',
+			'post_status'    => $status,
 			'fields'         => 'ids',
 			'orderby'        => 'ID',
 			'order'          => 'ASC',
