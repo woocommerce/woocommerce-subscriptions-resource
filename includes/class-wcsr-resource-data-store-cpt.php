@@ -102,7 +102,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 
 		$resource_id = wp_insert_post( apply_filters( 'wcsr_new_resouce_data', array(
 			'post_type'     => $this->post_type,
-			'post_status'   => 'publish',
+			'post_status'   => 'unended',
 			'post_author'   => 1, // Matches how Abstract_WC_Order_Data_Store_CPT works, using the default WP user
 			'post_date'     => gmdate( 'Y-m-d H:i:s', $resource->get_date_created()->getOffsetTimestamp() ),
 			'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $resource->get_date_created()->getTimestamp() ),
@@ -138,6 +138,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 
 		$resource->set_props( array(
 			'date_created'            => 0 < $post_object->post_date_gmt ? wc_string_to_timestamp( $post_object->post_date_gmt ) : null,
+			'status'                  => $post_object->post_status,
 			'external_id'             => get_post_meta( $resource_id, 'external_id', true ),
 			'subscription_id'         => get_post_meta( $resource_id, 'subscription_id', true ),
 
@@ -165,12 +166,13 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 		$resource->save_meta_data();
 		$changes = $resource->get_changes();
 
-		if ( array_intersect( array( 'date_created', 'subscription_id' ), array_keys( $changes ) ) ) {
+		if ( array_intersect( array( 'date_created', 'status', 'subscription_id' ), array_keys( $changes ) ) ) {
 
 			$post_data = array(
 				'post_date'     => gmdate( 'Y-m-d H:i:s', $resource->get_date_created( 'edit' )->getOffsetTimestamp() ),
 				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $resource->get_date_created( 'edit' )->getTimestamp() ),
 				'post_parent'   => $resource->get_subscription_id( 'edit' ),
+				'post_status'   => $resource->get_status( 'edit' ) ? $resource->get_status( 'edit' ) : apply_filters( 'wcsr_default_resource_status', 'unended' ),
 			);
 
 			/**

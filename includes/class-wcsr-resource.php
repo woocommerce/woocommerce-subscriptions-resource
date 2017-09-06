@@ -25,6 +25,7 @@ class WCSR_Resource extends WC_Data {
 	 */
 	protected $data = array(
 		'date_created'            => null,
+		'status'                  => '',
 		'external_id'             => 0,
 		'subscription_id'         => 0,
 		'is_pre_paid'             => true,
@@ -112,6 +113,20 @@ class WCSR_Resource extends WC_Data {
 		$deactivation_timestamps[] = gmdate( 'U' );
 
 		$this->set_deactivation_timestamps( $deactivation_timestamps );
+	}
+
+	/**
+	 * Update the resource's status
+	 */
+	public function get_status( $context = 'view' ) {
+		$status = $this->get_prop( 'status', $context );
+
+		if ( empty( $status ) && 'view' === $context ) {
+			// In view context, return the default status if no status has been set.
+			$status = apply_filters( 'wcsr_default_resource_status', 'unended' );
+		}
+
+		return $status;
 	}
 
 	/**
@@ -303,5 +318,49 @@ class WCSR_Resource extends WC_Data {
 	 */
 	public function set_deactivation_timestamps( $timestamps ) {
 		$this->set_prop( 'deactivation_timestamps', $timestamps );
+	}
+
+	/**
+	 * Set resource status.
+	 *
+	 * @since 1.0.0
+	 * @param string $new_status Status to change the resource to. Either 'unended' or 'ended'.
+	 * @return array details of change
+	 */
+	public function set_status( $new_status ) {
+		$old_status = $this->get_status();
+
+		// If setting the status, ensure it's set to a valid status.
+		if ( true === $this->object_read ) {
+			// Only allow valid new status
+			if ( ! in_array( $new_status, self::get_valid_statuses() ) && 'trash' !== $new_status ) {
+				$new_status = 'unended';
+			}
+
+			// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
+			if ( $old_status && ! in_array( $old_status, self::get_valid_statuses() ) && 'trash' !== $old_status ) {
+				$old_status = 'unended';
+			}
+		}
+
+		$this->set_prop( 'status', $new_status );
+
+		return array(
+			'from' => $old_status,
+			'to'   => $new_status,
+		);
+	}
+
+	/**
+	 * Get all valid statuses for this resource type
+	 *
+	 * @since 1.0.0
+	 * @return array Internal status keys e.g. 'wc-active'
+	 */
+	public static function get_valid_statuses() {
+		return array(
+			'unended',
+			'ended',
+		);
 	}
 }
