@@ -21,6 +21,8 @@ class WCSR_Data_Store {
 		add_action( 'init', __CLASS__ . '::init_store' );
 
 		add_filter( 'woocommerce_data_stores', __CLASS__ . '::add_data_store' );
+
+		add_action( 'init', __CLASS__ . '::register_statuses' );
 	}
 
 	/**
@@ -61,6 +63,21 @@ class WCSR_Data_Store {
 	 */
 	protected static function get_object_type() {
 		return 'subscription-resource';
+	}
+
+	/**
+	 * Set up ended and unended statuses for resources
+	 *
+	 * @since 1.0
+	 */
+	public static function register_statuses() {
+		foreach ( array( 'ended', 'unended' ) as $status ) {
+			register_post_status( $status, array(
+				'public'                 => false,
+				'exclude_from_search'    => false,
+				'show_in_admin_all_list' => false,
+			) );
+		}
 	}
 }
 WCSR_Data_Store::init();
