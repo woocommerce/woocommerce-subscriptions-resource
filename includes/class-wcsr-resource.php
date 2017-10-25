@@ -191,9 +191,10 @@ class WCSR_Resource extends WC_Data {
 	 * @return int
 	 */
 	public function get_days_active( $from_timestamp, $to_timestamp = null ) {
+		$days_active = 0;
 
 		if ( false === $this->has_been_activated() ) {
-			return 0;
+			return $days_active;
 		}
 
 		if ( is_null( $to_timestamp ) ) {
@@ -204,18 +205,16 @@ class WCSR_Resource extends WC_Data {
 		$activation_times   = self::get_timestamps_between( $this->get_activation_timestamps(), $from_timestamp, $to_timestamp );
 		$deactivation_times = self::get_timestamps_between( $this->get_deactivation_timestamps(), $from_timestamp, $to_timestamp );
 
-		// Now find the number of days between the timestamps where the resource was active (the resource must be inactive for more than 24 hours to be considered inactive for a given day)
-		$days_active = floor( ( $to_timestamp - $from_timestamp ) / DAY_IN_SECONDS );
-
-		// First remove any gap between the $from_timestamp and the resources creation date
-		if ( $this->get_date_created()->getTimestamp() > $from_timestamp ) {
-			$days_active -= floor( ( $this->get_date_created()->getTimestamp() - $from_timestamp ) / DAY_IN_SECONDS );
+		// if the first activation date is after the first deactivation date, make sure we append the start timestamps to act as the first "activated" date for the resource
+		if ( ! isset( $activation_times[0] ) || ( isset( $deactivation_times[0] ) && $activation_times[0] > $deactivation_times[0] ) ) {
+			$start_timestamp = ( $this->get_date_created()->getTimestamp() > $from_timestamp ) ? $this->get_date_created()->getTimestamp() : $from_timestamp;
+			array_unshift( $activation_times, $start_timestamp );
 		}
 
 		foreach ( $activation_times as $i => $activation_time ) {
-			if ( isset( $deactivation_times[ $i ] ) ) {
-				$days_active -= floor( ( $activation_time - $deactivation_times[ $i ] ) / DAY_IN_SECONDS );
-			}
+			// If there is corresponding deactivation timestamp, the resouce has deactivated before the end of the period so that's the time we want, otherwise, use the end of the period as the resource was still active at end of the period
+			$deactivation_time = isset( $deactivation_times[ $i ] ) ? $deactivation_times[ $i ] : $to_timestamp;
+			$days_active += absint( ceil( ( $deactivation_time - $activation_time ) / DAY_IN_SECONDS ) );
 		}
 
 		return $days_active;
