@@ -71,7 +71,7 @@ class WCSR_Data_Store {
 	 * @since 1.0
 	 */
 	public static function register_statuses() {
-		foreach ( array( 'ended', 'unended' ) as $status ) {
+		foreach ( array( 'wcsr-ended', 'wcsr-unended' ) as $status ) {
 			register_post_status( $status, array(
 				'public'                 => false,
 				'exclude_from_search'    => false,

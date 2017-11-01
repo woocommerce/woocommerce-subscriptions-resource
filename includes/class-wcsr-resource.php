@@ -123,7 +123,7 @@ class WCSR_Resource extends WC_Data {
 
 		if ( empty( $status ) && 'view' === $context ) {
 			// In view context, return the default status if no status has been set.
-			$status = apply_filters( 'wcsr_default_resource_status', 'unended' );
+			$status = apply_filters( 'wcsr_default_resource_status', 'wcsr-unended' );
 		}
 
 		return $status;
@@ -324,7 +324,7 @@ class WCSR_Resource extends WC_Data {
 	 * Set resource status.
 	 *
 	 * @since 1.0.0
-	 * @param string $new_status Status to change the resource to. Either 'unended' or 'ended'.
+	 * @param string $new_status Status to change the resource to. Either 'wcsr-unended' or 'wcsr-ended'.
 	 * @return array details of change
 	 */
 	public function set_status( $new_status ) {
@@ -334,12 +334,12 @@ class WCSR_Resource extends WC_Data {
 		if ( true === $this->object_read ) {
 			// Only allow valid new status
 			if ( ! in_array( $new_status, self::get_valid_statuses() ) && 'trash' !== $new_status ) {
-				$new_status = 'unended';
+				$new_status = 'wcsr-unended';
 			}
 
 			// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
 			if ( $old_status && ! in_array( $old_status, self::get_valid_statuses() ) && 'trash' !== $old_status ) {
-				$old_status = 'unended';
+				$old_status = 'wcsr-unended';
 			}
 		}
 
@@ -359,8 +359,8 @@ class WCSR_Resource extends WC_Data {
 	 */
 	public static function get_valid_statuses() {
 		return array(
-			'unended',
-			'ended',
+			'wcsr-unended',
+			'wcsr-ended',
 		);
 	}
 }

@@ -102,7 +102,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 
 		$resource_id = wp_insert_post( apply_filters( 'wcsr_new_resouce_data', array(
 			'post_type'     => $this->post_type,
-			'post_status'   => 'unended',
+			'post_status'   => 'wcsr-unended',
 			'post_author'   => 1, // Matches how Abstract_WC_Order_Data_Store_CPT works, using the default WP user
 			'post_date'     => gmdate( 'Y-m-d H:i:s', $resource->get_date_created()->getOffsetTimestamp() ),
 			'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $resource->get_date_created()->getTimestamp() ),
@@ -172,7 +172,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 				'post_date'     => gmdate( 'Y-m-d H:i:s', $resource->get_date_created( 'edit' )->getOffsetTimestamp() ),
 				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', $resource->get_date_created( 'edit' )->getTimestamp() ),
 				'post_parent'   => $resource->get_subscription_id( 'edit' ),
-				'post_status'   => $resource->get_status( 'edit' ) ? $resource->get_status( 'edit' ) : apply_filters( 'wcsr_default_resource_status', 'unended' ),
+				'post_status'   => $resource->get_status( 'edit' ) ? $resource->get_status( 'edit' ) : apply_filters( 'wcsr_default_resource_status', 'wcsr-unended' ),
 			);
 
 			/**
@@ -232,7 +232,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 	 * @param string $status
 	 * @return array
 	 */
-	public function get_resource_ids_for_subscription( $subscription_id, $status = 'unended' ) {
+	public function get_resource_ids_for_subscription( $subscription_id, $status = 'wcsr-unended' ) {
 		$status = ( empty( $status ) || ! in_array( $status, WCSR_Resource::get_valid_statuses() ) ) ? 'any' : $status;
 
 		$resource_post_ids = get_posts( array(
@@ -256,7 +256,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 	 * @param string $status
 	 * @return int
 	 */
-	public function get_resource_id_by_external_id( $external_id, $status = 'unended' ) {
+	public function get_resource_id_by_external_id( $external_id, $status = 'wcsr-unended' ) {
 		$status = ( empty( $status ) || ! in_array( $status, WCSR_Resource::get_valid_statuses() ) ) ? 'any' : $status;
 
 		$resource_post_ids = get_posts( array(
