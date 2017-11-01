@@ -19,8 +19,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return array Internal status keys e.g. 'wcsr-unended'
  */
 public static function wcsr_get_valid_statuses() {
-	return array(
+	return apply_filters( 'wcsr_valid_statuses', array(
 		'wcsr-unended',
 		'wcsr-ended',
-	);
+	) );
 }
