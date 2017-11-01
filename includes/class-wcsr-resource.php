@@ -118,7 +118,7 @@ class WCSR_Resource extends WC_Data {
 	/**
 	 * Update the resource's status
 	 *
-	 * @since 1.0.0
+	 * @since 1.1.0
 	 */
 	public function get_status( $context = 'view' ) {
 		$status = $this->get_prop( 'status', $context );
@@ -325,7 +325,7 @@ class WCSR_Resource extends WC_Data {
 	/**
 	 * Set resource status.
 	 *
-	 * @since 1.0.0
+	 * @since 1.1.0
 	 * @param string $new_status Status to change the resource to. Either 'wcsr-unended' or 'wcsr-ended'.
 	 * @return array details of change
 	 */
