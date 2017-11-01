@@ -117,6 +117,8 @@ class WCSR_Resource extends WC_Data {
 
 	/**
 	 * Update the resource's status
+	 *
+	 * @since 1.0.0
 	 */
 	public function get_status( $context = 'view' ) {
 		$status = $this->get_prop( 'status', $context );
@@ -333,12 +335,12 @@ class WCSR_Resource extends WC_Data {
 		// If setting the status, ensure it's set to a valid status.
 		if ( true === $this->object_read ) {
 			// Only allow valid new status
-			if ( ! in_array( $new_status, self::get_valid_statuses() ) && 'trash' !== $new_status ) {
+			if ( ! in_array( $new_status, wcsr_get_valid_statuses() ) && 'trash' !== $new_status ) {
 				$new_status = 'wcsr-unended';
 			}
 
 			// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
-			if ( $old_status && ! in_array( $old_status, self::get_valid_statuses() ) && 'trash' !== $old_status ) {
+			if ( $old_status && ! in_array( $old_status, wcsr_get_valid_statuses() ) && 'trash' !== $old_status ) {
 				$old_status = 'wcsr-unended';
 			}
 		}
@@ -348,19 +350,6 @@ class WCSR_Resource extends WC_Data {
 		return array(
 			'from' => $old_status,
 			'to'   => $new_status,
-		);
-	}
-
-	/**
-	 * Get all valid statuses for this resource type
-	 *
-	 * @since 1.0.0
-	 * @return array Internal status keys e.g. 'wc-active'
-	 */
-	public static function get_valid_statuses() {
-		return array(
-			'wcsr-unended',
-			'wcsr-ended',
 		);
 	}
 }

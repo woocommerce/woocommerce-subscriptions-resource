@@ -241,7 +241,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 	 * @return array
 	 */
 	public function get_resource_ids_for_subscription( $subscription_id, $status = 'wcsr-unended' ) {
-		$status = ( empty( $status ) || ! in_array( $status, WCSR_Resource::get_valid_statuses() ) ) ? 'any' : $status;
+		$status = ( empty( $status ) || ! in_array( $status, wcsr_get_valid_statuses() ) ) ? 'any' : $status;
 
 		$resource_post_ids = get_posts( array(
 			'posts_per_page' => -1,
@@ -265,7 +265,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 	 * @return int
 	 */
 	public function get_resource_id_by_external_id( $external_id, $status = 'wcsr-unended' ) {
-		$status = ( empty( $status ) || ! in_array( $status, WCSR_Resource::get_valid_statuses() ) ) ? 'any' : $status;
+		$status = ( empty( $status ) || ! in_array( $status, wcsr_get_valid_statuses() ) ) ? 'any' : $status;
 
 		$resource_post_ids = get_posts( array(
 			'posts_per_page' => 1,
