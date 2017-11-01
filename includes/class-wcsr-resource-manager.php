@@ -111,7 +111,7 @@ class WCSR_Resource_Manager {
 	public static function maybe_prorate_renewal( $renewal_order, $subscription ) {
 
 		$is_prorated  = false;
-		$resource_ids = WCSR_Data_Store::store()->get_resource_ids_for_subscription( $subscription->get_id() );
+		$resource_ids = WCSR_Data_Store::store()->get_resource_ids_for_subscription( $subscription->get_id(), 'wcsr-unended' );
 
 		if ( ! empty( $resource_ids ) ) {
 

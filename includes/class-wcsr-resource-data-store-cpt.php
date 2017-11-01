@@ -240,7 +240,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 	 * @param string $status
 	 * @return array
 	 */
-	public function get_resource_ids_for_subscription( $subscription_id, $status = 'wcsr-unended' ) {
+	public function get_resource_ids_for_subscription( $subscription_id, $status = 'any' ) {
 		$status = ( empty( $status ) || ! in_array( $status, wcsr_get_valid_statuses() ) ) ? 'any' : $status;
 
 		$resource_post_ids = get_posts( array(
