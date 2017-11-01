@@ -125,7 +125,7 @@ class WCSR_Resource extends WC_Data {
 
 		if ( empty( $status ) && 'view' === $context ) {
 			// In view context, return the default status if no status has been set.
-			$status = apply_filters( 'wcsr_default_resource_status', 'wcsr-unended' );
+			$status = apply_filters( 'wcsr_default_resource_status', 'wcsr-unended', $this );
 		}
 
 		return $status;
