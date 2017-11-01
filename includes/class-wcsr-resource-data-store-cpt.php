@@ -87,6 +87,14 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 				)
 			)
 		);
+
+		foreach ( array( 'wcsr-ended', 'wcsr-unended' ) as $status ) {
+			register_post_status( $status, array(
+				'public'                 => false,
+				'exclude_from_search'    => false,
+				'show_in_admin_all_list' => false,
+			) );
+		}
 	}
 
 	/**
