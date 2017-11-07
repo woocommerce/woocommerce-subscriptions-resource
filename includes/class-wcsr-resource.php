@@ -203,7 +203,7 @@ class WCSR_Resource extends WC_Data {
 				continue;
 			}
 
-			$days_active += absint( ceil( ( $deactivation_time - $activation_time ) / DAY_IN_SECONDS ) );
+			$days_active += intval( ceil( ( $deactivation_time - $activation_time ) / DAY_IN_SECONDS ) );
 
 			// if the activation date is the same as the previous activation date, minus one off one day active from the result since that day was already accounted for previously
 			if ( $i !== 0 && gmdate( 'Y-m-d', $activation_times[ $i - 1 ] ) == gmdate( 'Y-m-d', $activation_times[ $i ] ) ) {
