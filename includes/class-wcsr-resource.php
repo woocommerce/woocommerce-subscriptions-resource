@@ -199,14 +199,14 @@ class WCSR_Resource extends WC_Data {
 			$deactivation_time = isset( $deactivation_times[ $i ] ) ? $deactivation_times[ $i ] : $to_timestamp;
 
 			// skip over any days that are activated/deactivated on the same day and have already been accounted for
-			if ( $i !== 0 && gmdate( 'Y-m-d', $deactivation_times[ --$i ] ) == gmdate( 'Y-m-d', $deactivation_time ) ) {
+			if ( $i !== 0 && gmdate( 'Y-m-d', $deactivation_times[ $i - 1 ] ) == gmdate( 'Y-m-d', $deactivation_time ) ) {
 				continue;
 			}
 
 			$days_active += absint( ceil( ( $deactivation_time - $activation_time ) / DAY_IN_SECONDS ) );
 
 			// if the activation date is the same as the previous activation date, minus one off one day active from the result since that day was already accounted for previously
-			if ( $i !== 0 && gmdate( 'Y-m-d', $activation_times[ --$i ] ) == gmdate( 'Y-m-d', $activation_times[ $i ] ) ) {
+			if ( $i !== 0 && gmdate( 'Y-m-d', $activation_times[ $i - 1 ] ) == gmdate( 'Y-m-d', $activation_times[ $i ] ) ) {
 				$days_active -= 1;
 			}
 		}
