@@ -271,6 +271,21 @@ class WCSR_Resource_Test extends PHPUnit_Framework_TestCase {
 				'deactivation_times'   => array( '2017-09-14 21:00:03', '2017-09-15 01:15:11' ),
 				'expected_days_active' => 1,
 			),
+
+			/*
+			 * Simulate an existing resource that is activated for 5ish hours crossing into the next day and then left inactive.
+			 * Same overall time as Test 15 (without the multiple activating and deactiving on the same day)
+			 *
+			 * To test this requires a resource that is:
+			 * 0. created prior to the start of the period being checked ($creation_time < $from_timestamp)
+			 * 1. activated for 5 hours, then deactivatd for the rest of the cycle
+			 */
+			16 => array(
+				'date_created'         => '2017-06-14 09:13:14',
+				'activation_times'     => array( '2017-09-14 20:00:03' ),
+				'deactivation_times'   => array( '2017-09-15 01:15:11' ),
+				'expected_days_active' => 1,
+			),
 		);
 	}
 
