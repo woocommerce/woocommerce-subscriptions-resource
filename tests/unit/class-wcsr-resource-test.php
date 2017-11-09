@@ -190,6 +190,7 @@ class WCSR_Resource_Test extends PHPUnit_Framework_TestCase {
 				'activation_times'     => array( '2017-09-14 09:13:14', '2017-09-14 13:13:14', '2017-09-14 20:00:03' ),
 				'deactivation_times'   => array( '2017-09-14 10:35:43', '2017-09-14 17:24:10', '2017-09-16 17:24:10' ),
 				'expected_days_active' => 2,
+				'expected_days_active' => 3,
 			),
 		);
 	}
