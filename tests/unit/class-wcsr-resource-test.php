@@ -189,8 +189,87 @@ class WCSR_Resource_Test extends PHPUnit_Framework_TestCase {
 				'date_created'         => '2017-09-14 09:13:14',
 				'activation_times'     => array( '2017-09-14 09:13:14', '2017-09-14 13:13:14', '2017-09-14 20:00:03' ),
 				'deactivation_times'   => array( '2017-09-14 10:35:43', '2017-09-14 17:24:10', '2017-09-16 17:24:10' ),
-				'expected_days_active' => 2,
 				'expected_days_active' => 3,
+			),
+
+			/*
+			 * Simulate a new active resource that is activated and deactivated for multiple occasions on the same day and then left active for the rest of the month.
+			 *
+			 * To test this requires a resource that is:
+			 * 0. created at the same time as the start of the period being checked ($from_timestamp)
+			 * 1. activate at the time it is created
+			 * 2. activated for just over an hour, then deactivated for 2'ish hours
+			 * 3. activated for the rest of the cycle
+			 */
+			11 => array(
+				'date_created'         => '2017-09-14 09:13:14',
+				'activation_times'     => array( '2017-09-14 09:13:14', '2017-09-14 13:13:14', '2017-09-14 20:00:03' ),
+				'deactivation_times'   => array( '2017-09-14 10:35:43', '2017-09-14 17:24:10' ),
+				'expected_days_active' => 31,
+			),
+
+			/*
+			 * Simulate a new active resource that is activated and deactivated for multiple occasions on the same day and then left inactive for the rest of the month.
+			 *
+			 * To test this requires a resource that is:
+			 * 0. created at the same time as the start of the period being checked ($from_timestamp)
+			 * 1. activate at the time it is created
+			 * 2. activated for just over an hour, then deactivated for 2'ish hours
+			 * 3. activated 4 hours then deactivated for the rest of the period
+			 */
+			12 => array(
+				'date_created'         => '2017-09-14 09:13:14',
+				'activation_times'     => array( '2017-09-14 09:13:14', '2017-09-14 13:13:14' ),
+				'deactivation_times'   => array( '2017-09-14 10:35:43', '2017-09-14 17:24:10' ),
+				'expected_days_active' => 1,
+			),
+
+			/*
+			 * Simulate a new active resource that is activated and deactivated for multiple occasions everyday for 3 days and then left inactive for the rest of the month.
+			 *
+			 * To test this requires a resource that is:
+			 * 0. created at the same time as the start of the period being checked ($from_timestamp)
+			 * 1. activate at the time it is created
+			 * 2. activated for just over an hour, then deactivated for 2'ish hours
+			 * 3. activated 4 hours then deactivated for the rest of the period
+			 */
+			13 => array(
+				'date_created'         => '2017-09-14 09:13:14',
+				'activation_times'     => array( '2017-09-14 09:13:14', '2017-09-14 13:13:14', '2017-09-15 09:13:14', '2017-09-15 13:13:14', '2017-09-16 09:13:14', '2017-09-16 13:13:14' ),
+				'deactivation_times'   => array( '2017-09-14 10:35:43', '2017-09-14 17:24:10', '2017-09-15 10:35:43', '2017-09-15 17:24:10', '2017-09-16 10:35:43', '2017-09-16 17:24:10' ),
+				'expected_days_active' => 3,
+			),
+
+			/*
+			 * Simulate an existing resource that is activated roughly 12 hours into the first day then left activated
+			 *
+			 * To test this requires a resource that is:
+			 * 0. created at the same time as the start of the period being checked ($from_timestamp)
+			 * 1. activate at the time it is created
+			 * 2. activated for just over an hour, then deactivated for 2'ish hours
+			 * 3. activated for the rest of the cycle
+			 */
+			14 => array(
+				'date_created'         => '2017-08-14 09:13:14',
+				'activation_times'     => array( '2017-09-14 20:00:03' ),
+				'deactivation_times'   => array(),
+				'expected_days_active' => 30,
+			),
+
+			/*
+			 * Simulate an existing resource that is activated for 1 hour into the first day then left activated
+			 *
+			 * To test this requires a resource that is:
+			 * 0. created at the same time as the start of the period being checked ($from_timestamp)
+			 * 1. activate at the time it is created
+			 * 2. activated for just over an hour, then deactivated for 2'ish hours
+			 * 3. activated for the rest of the cycle
+			 */
+			15 => array(
+				'date_created'         => '2017-06-14 09:13:14',
+				'activation_times'     => array( '2017-09-14 20:00:03', '2017-09-14 22:00:03' ),
+				'deactivation_times'   => array( '2017-09-14 21:00:03', '2017-09-15 01:15:11' ),
+				'expected_days_active' => 1,
 			),
 		);
 	}
