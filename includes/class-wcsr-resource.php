@@ -216,19 +216,64 @@ class WCSR_Resource extends WC_Data {
 			$deactivation_time = isset( $deactivation_times[ $i ] ) ? $deactivation_times[ $i ] : $to_timestamp;
 
 			// skip over any days that are activated/deactivated on the same day and have already been accounted for
-			if ( $i !== 0 && gmdate( 'Y-m-d', $deactivation_times[ $i - 1 ] ) == gmdate( 'Y-m-d', $deactivation_time ) ) {
+			if ( $i !== 0 && self::is_on_same_day( $deactivation_time, $deactivation_times[ $i - 1 ], $activation_times[0] ) ) {
 				continue;
 			}
 
 			$days_active += intval( ceil( ( $deactivation_time - $activation_time ) / DAY_IN_SECONDS ) );
-
-			// if the activation date is the same as the previous activation date, minus one off one day active from the result since that day was already accounted for previously
-			if ( $i !== 0 && gmdate( 'Y-m-d', $activation_times[ $i - 1 ] ) == gmdate( 'Y-m-d', $activation_times[ $i ] ) ) {
-				$days_active -= 1;
-			}
 		}
 
 		return $days_active;
+	}
+
+	/**
+	 * Prototype/demo conditional check for whether a timestamp is on the same "day" as another timestamp
+	 *
+	 * The catch is the "day" is not typical calendar day - it based on a 24 hour period from initial activation
+	 *
+	 * Initial activation could be the actual time it was first activated of the start of the period.
+	 *
+	 * Takes the activation/starting timestamp and gets the time our days start from.
+	 * Takes the timestamp we are checking if we are on the same day as and gets the date, previous days date and time
+	 * Works out whether the current day started on the same date as the one we are comparing with or a day earlier and works makes a time stampe fo when the day starts
+	 * Works out when the days ends
+	 * Check if our timestamp is with the start and end dates we have determined
+	 *
+	 * @param  int  $current_timestamp    [description]
+	 * @param  int  $compare_timestamp [description]
+	 * @param  int  $start_timestamp  [description]
+	 * @return boolean true on same day | false if not
+	 */
+	public static function is_on_same_day( $current_timestamp, $compare_timestamp, $start_timestamp ) {
+
+		$start_time = gmdate( 'H:i:s', $start_timestamp );
+		$start_hour = gmdate( 'H', $start_timestamp );
+		$start_min  = gmdate( 'i', $start_timestamp );
+		$start_sec  = gmdate( 's', $start_timestamp );
+
+		$compare_day  = gmdate( 'Y-m-d', $compare_timestamp );
+		$compare_day_previous  = gmdate( 'Y-m-d', strtotime( '-1 day', $compare_timestamp ) );
+		$compare_hour = gmdate( 'H', $compare_timestamp );
+		$compare_min  = gmdate( 'i', $compare_timestamp );
+		$compare_sec  = gmdate( 's', $compare_timestamp );
+
+		$start_of_the_day_date_time = $compare_day . ' ' . $start_time;
+		$start_of_the_day = strtotime( $start_of_the_day_date_time );
+
+		// Adjust for H:M:S being less
+		if ( $compare_hour < $start_hour || ( ( $compare_hour == $start_hour ) && ( $compare_min < $start_min ) ) || ( ( $compare_hour == $start_hour ) && ( $compare_min == $start_min ) && ( $compare_sec < $start_sec ) ) ) {
+			$start_of_the_day_date_time = $compare_day_previous . ' ' . $start_time;
+			$start_of_the_day = strtotime( $start_of_the_day_date_time );
+		}
+
+		$end_of_the_day = strtotime( '+1 day', $start_of_the_day );
+
+		// Compare timestamp to see if it is within our ranges
+		if ( ( $current_timestamp >= $start_of_the_day ) && ( $current_timestamp < $end_of_the_day ) ) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
