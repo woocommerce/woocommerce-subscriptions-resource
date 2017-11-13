@@ -203,7 +203,20 @@ class WCSR_Resource extends WC_Data {
 				continue;
 			}
 
-			$days_active += intval( ceil( ( $deactivation_time - $activation_time ) / DAY_IN_SECONDS ) );
+			// Calculate days based on time between
+			$days_by_time = intval( ceil( ( $deactivation_time - $activation_time ) / DAY_IN_SECONDS ) );
+
+			// Increase our tally
+			$days_active += $days_by_time;
+
+			// If days based on time is only 1 but it was "across a day" we may need to adjust IF NOT accounted for already
+			if ( $days_by_time == 1 && ! self::is_on_same_day( $activation_time, $deactivation_time, $activation_times[0] ) ) {
+
+				// if this activation didn't start on the same day as previous activation it is safe to add an extra day
+				if ( ! self::is_on_same_day( $activation_time, $deactivation_times[ $i - 1 ], $activation_times[0] ) ) {
+					$days_active += 1;
+				}
+			}
 		}
 
 		return $days_active;
