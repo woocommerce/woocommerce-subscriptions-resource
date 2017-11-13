@@ -194,13 +194,19 @@ class WCSR_Resource extends WC_Data {
 			array_unshift( $activation_times, $start_timestamp );
 		}
 
+		// keep track of the last non_same day activation time
+		$same_day_start_time = $activation_times[0];
+
 		foreach ( $activation_times as $i => $activation_time ) {
 			// If there is corresponding deactivation timestamp, the resouce has deactivated before the end of the period so that's the time we want, otherwise, use the end of the period as the resource was still active at end of the period
 			$deactivation_time = isset( $deactivation_times[ $i ] ) ? $deactivation_times[ $i ] : $to_timestamp;
 
 			// skip over any days that are activated/deactivated on the same day and have already been accounted for
-			if ( $i !== 0 && self::is_on_same_day( $deactivation_time, $deactivation_times[ $i - 1 ], $activation_times[0] ) ) {
+			if ( $i !== 0 && self::is_on_same_day( $deactivation_time, $deactivation_times[ $i - 1 ], $same_day_start_time ) ) {
 				continue;
+			} else {
+				// if not on the same day, make sure we reset when the start of the same day is calculated from
+				$same_day_start_time = $activation_time;
 			}
 
 			$days_active += intval( ceil( ( $deactivation_time - $activation_time ) / DAY_IN_SECONDS ) );
