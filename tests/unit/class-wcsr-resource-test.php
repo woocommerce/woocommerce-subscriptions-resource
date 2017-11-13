@@ -354,6 +354,16 @@ class WCSR_Resource_Test extends PHPUnit_Framework_TestCase {
 				'deactivation_times'   => array( '2017-09-15 09:00:13', '2017-09-30 08:15:11', '2017-09-30 11:00:03', '2017-10-02 10:00:03' ),
 				'expected_days_active' => 17,
 			),
+
+			// Demonstrates most basic difference between comparing same day based on calendar days vs 24 hour periods
+			// Branch issue_11 picks this up as 2 days
+			// This Branch picks this up as 1 day
+			24 => array(
+				'date_created'         => '2017-09-14 09:13:14',
+				'activation_times'     => array( '2017-09-14 09:13:14', '2017-09-15 01:00:00', ),
+				'deactivation_times'   => array( '2017-09-14 21:13:13', '2017-09-15 03:00:00', ),
+				'expected_days_active' => 1,
+			),
 		);
 	}
 
