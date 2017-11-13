@@ -299,7 +299,7 @@ class WCSR_Resource_Test extends PHPUnit_Framework_TestCase {
 			17 => array(
 				'date_created'         => '2017-09-14 09:13:14',
 				'activation_times'     => array( '2017-09-14 09:13:14', '2017-09-30 07:00:03', '2017-09-30 09:00:03' ),
-				'deactivation_times'   => array( '2017-09-15 09:13:13', '2017-09-30 08:15:11', '2017-09-30 11:00:03'),
+				'deactivation_times'   => array( '2017-09-15 09:13:13', '2017-09-30 08:15:11', '2017-09-30 11:00:03' ),
 				'expected_days_active' => 3,
 			),
 
