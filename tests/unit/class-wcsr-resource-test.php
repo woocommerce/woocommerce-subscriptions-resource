@@ -364,6 +364,38 @@ class WCSR_Resource_Test extends PHPUnit_Framework_TestCase {
 				'deactivation_times'   => array( '2017-09-14 21:13:13', '2017-09-15 03:00:00', ),
 				'expected_days_active' => 1,
 			),
+
+			// First activation is on a different day to start AND crosses a "day"
+			25 => array(
+				'date_created'         => '2017-09-16 08:13:14',
+				'activation_times'     => array( '2017-09-16 08:13:14' ),
+				'deactivation_times'   => array( '2017-09-16 10:13:14' ),
+				'expected_days_active' => 2,
+			),
+
+			// First activation is on a different day to start AND crosses a "day", plus another activation that crosses same day
+			26 => array(
+				'date_created'         => '2017-09-16 08:13:14',
+				'activation_times'     => array( '2017-09-16 08:13:14', '2017-09-17 08:13:14' ),
+				'deactivation_times'   => array( '2017-09-16 10:13:14', '2017-09-18 08:13:14' ),
+				'expected_days_active' => 3,
+			),
+
+			// First activation is on a different day to start AND crosses a "day", plus activation that doesn't cross 2 days
+			27 => array(
+				'date_created'         => '2017-09-16 08:13:14',
+				'activation_times'     => array( '2017-09-16 08:13:14', '2017-09-17 10:13:14' ),
+				'deactivation_times'   => array( '2017-09-16 10:13:14', '2017-09-18 08:13:14' ),
+				'expected_days_active' => 3,
+			),
+
+			// First activation is on a different day to start AND crosses a "day", plus more activations which also crosses 2 days
+			28 => array(
+				'date_created'         => '2017-09-16 08:13:14',
+				'activation_times'     => array( '2017-09-16 08:13:14', '2017-09-18 08:13:14' ),
+				'deactivation_times'   => array( '2017-09-16 10:13:14', '2017-09-18 10:13:14' ),
+				'expected_days_active' => 4,
+			),
 		);
 	}
 
