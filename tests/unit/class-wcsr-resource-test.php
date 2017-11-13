@@ -286,6 +286,74 @@ class WCSR_Resource_Test extends PHPUnit_Framework_TestCase {
 				'deactivation_times'   => array( '2017-09-15 01:15:11' ),
 				'expected_days_active' => 1,
 			),
+
+			/*
+			 * Simulate an new resource that is activated for 1 day at the start, then deactivated until the end of the month, then activated and deactivated across a 4hour period.
+			 * Similar to Test 15, but this test has multiple activations and deactivations at the end of the test and is also active at the beginning.
+			 *
+			 * To test this requires a resource that is:
+			 * 0. created at the same time as the start of the period being checked ($from_timestamp)
+			 * 1. activate at the time it is created for 1 day, then deactivated
+			 * 2. activated for a just under 3 hours across a 4 hour period, then deactivatd for the rest of the cycle
+			 */
+			17 => array(
+				'date_created'         => '2017-09-14 09:13:14',
+				'activation_times'     => array( '2017-09-14 09:13:14', '2017-09-30 07:00:03', '2017-09-30 09:00:03' ),
+				'deactivation_times'   => array( '2017-09-15 09:13:13', '2017-09-30 08:15:11', '2017-09-30 11:00:03'),
+				'expected_days_active' => 3,
+			),
+
+			/*
+			 * Simulate an new resource that is activated for 1 day, then deactivated until the end of the month for 4 hours.
+			 * This test is the same as Test 17 (without the multiple activating and deactiving on the same day)
+			 *
+			 * To test this requires a resource that is:
+			 * 0. created at the same time as the start of the period being checked ($from_timestamp)
+			 * 1. activate at the time it is created for 1 day, then deactivated
+			 * 2. activated for 4 hours at the end of the cycle, then deactivatd for the rest of the cycle
+			 */
+			18 => array(
+				'date_created'         => '2017-09-14 09:13:14',
+				'activation_times'     => array( '2017-09-14 09:13:14', '2017-09-30 07:00:03' ),
+				'deactivation_times'   => array( '2017-09-15 09:13:13', '2017-09-30 11:00:03' ),
+				'expected_days_active' => 3,
+			),
+
+			19 => array(
+				'date_created'         => '2017-09-14 09:13:14',
+				'activation_times'     => array( '2017-09-14 09:13:14', '2017-09-15 09:12:03', '2017-09-30 09:00:03' ),
+				'deactivation_times'   => array( '2017-09-15 09:00:13', '2017-09-30 08:15:11', '2017-09-30 11:00:03' ),
+				'expected_days_active' => 17,
+			),
+
+			20 => array(
+				'date_created'         => '2017-09-14 09:13:14',
+				'activation_times'     => array( '2017-09-14 09:13:14', '2017-09-15 09:12:03', '2017-09-30 09:00:03', '2017-10-01 08:00:03' ),
+				'deactivation_times'   => array( '2017-09-15 09:00:13', '2017-09-30 08:15:11', '2017-09-30 11:00:03', '2017-10-01 10:00:03' ),
+				'expected_days_active' => 18,
+			),
+
+			21 => array(
+				'date_created'         => '2017-09-14 09:13:14',
+				'activation_times'     => array( '2017-09-14 09:13:14', '2017-09-15 09:12:03', '2017-09-30 09:00:03', '2017-10-02 08:00:03' ),
+				'deactivation_times'   => array( '2017-09-15 09:00:13', '2017-09-30 08:15:11', '2017-09-30 11:00:03', '2017-10-02 10:00:03' ),
+				'expected_days_active' => 19,
+			),
+
+
+			22 => array(
+				'date_created'         => '2017-09-14 09:13:14',
+				'activation_times'     => array( '2017-09-14 09:13:14', '2017-09-15 09:12:03', '2017-09-30 09:00:03', '2017-10-02 09:30:03' ),
+				'deactivation_times'   => array( '2017-09-15 09:00:13', '2017-09-30 08:15:11', '2017-09-30 11:00:03', '2017-10-02 10:00:03' ),
+				'expected_days_active' => 18,
+			),
+
+			23 => array(
+				'date_created'         => '2017-09-14 09:13:14',
+				'activation_times'     => array( '2017-09-14 09:13:14', '2017-09-16 09:16:03', '2017-09-30 09:00:03', '2017-10-02 09:30:03' ),
+				'deactivation_times'   => array( '2017-09-15 09:00:13', '2017-09-30 08:15:11', '2017-09-30 11:00:03', '2017-10-02 10:00:03' ),
+				'expected_days_active' => 17,
+			),
 		);
 	}
 
