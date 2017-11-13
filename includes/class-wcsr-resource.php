@@ -216,7 +216,7 @@ class WCSR_Resource extends WC_Data {
 			$deactivation_time = isset( $deactivation_times[ $i ] ) ? $deactivation_times[ $i ] : $to_timestamp;
 
 			// skip over any days that are activated/deactivated on the same day and have already been accounted for
-			if ( $i !== 0 && self::is_on_same_day( $deactivation_time, $deactivation_times[ $i - 1 ], $activation_times[0] ) ) {
+			if ( $i !== 0 && self::is_on_same_day( $deactivation_time, $deactivation_times[ $i - 1 ], $from_timestamp ) ) {
 				continue;
 			}
 
@@ -227,10 +227,15 @@ class WCSR_Resource extends WC_Data {
 			$days_active += $days_by_time;
 
 			// If days based on time is only 1 but it was "across a day" we may need to adjust IF NOT accounted for already
-			if ( $days_by_time == 1 && ! self::is_on_same_day( $activation_time, $deactivation_time, $activation_times[0] ) ) {
+			if ( $days_by_time == 1 && ! self::is_on_same_day( $activation_time, $deactivation_time, $from_timestamp ) ) {
+
+				// handle situation if first activation crosses a day
+				if ( $i == 0 && ! self::is_on_same_day( $activation_time, $deactivation_time, $from_timestamp ) ) {
+					$days_active += 1;
+				}
 
 				// if this activation didn't start on the same day as previous activation it is safe to add an extra day
-				if ( ! self::is_on_same_day( $activation_time, $deactivation_times[ $i - 1 ], $activation_times[0] ) ) {
+				if ( $i !== 0 && ! self::is_on_same_day( $activation_time, $deactivation_times[ $i - 1 ], $from_timestamp ) ) {
 					$days_active += 1;
 				}
 			}
