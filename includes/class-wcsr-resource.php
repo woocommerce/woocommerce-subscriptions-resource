@@ -208,6 +208,12 @@ class WCSR_Resource extends WC_Data {
 		// if the first activation date is after the first deactivation date, make sure we prepend the start timestamp to act as the first "activated" date for the resource
 		if ( ! isset( $activation_times[0] ) || ( isset( $deactivation_times[0] ) && $activation_times[0] > $deactivation_times[0] ) ) {
 			$start_timestamp = ( $this->get_date_created()->getTimestamp() > $from_timestamp ) ? $this->get_date_created()->getTimestamp() : $from_timestamp;
+
+			// before setting the start timestamp as the created time or the $from_timestamp make sure the deactivation date doesn't come before it
+			if ( isset( $deactivation_times[0] ) && $start_timestamp > $deactivation_times[0] ) {
+				throw new Exception( 'The resource first deactivation date in the period comes before the resource start time or before the beginning of the period. This is invalid.' );
+			}
+
 			array_unshift( $activation_times, $start_timestamp );
 		}
 
