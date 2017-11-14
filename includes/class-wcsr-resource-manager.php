@@ -139,6 +139,7 @@ class WCSR_Resource_Manager {
 					// Now add a prorated line item for each resource based on the resource's usage for this period
 					$days_in_period = wcs_estimate_periods_between( $from_timestamp, $renewal_order->get_date_created()->getTimestamp(), 'day', 'floor' );
 					$days_active    = $resource->get_days_active( $from_timestamp, $renewal_order->get_date_created()->getTimestamp() );
+					$days_active_ratio = ( $days_active > $days_in_period ? $days_in_period : $days_active ) / $days_in_period; // make sure the days active is not more than the days in period and also calcu
 
 					foreach ( $line_items as $line_item ) {
 
@@ -152,15 +153,15 @@ class WCSR_Resource_Manager {
 
 							foreach( $taxes as $total_type => $tax_values ) {
 								foreach( $tax_values as $tax_id => $tax_value ) {
-									$taxes[ $total_type ][ $tax_id ] = $tax_value / $days_in_period * $days_active;
+									$taxes[ $total_type ][ $tax_id ] = $tax_value * $days_active_ratio;
 								}
 							}
 
 							$new_item->set_props( array(
-								'subtotal'     => $line_item->get_subtotal() / $days_in_period * $days_active,
-								'total'        => $line_item->get_total() / $days_in_period * $days_active,
-								'subtotal_tax' => $line_item->get_subtotal_tax() / $days_in_period * $days_active,
-								'total_tax'    => $line_item->get_total_tax() / $days_in_period * $days_active,
+								'subtotal'     => $line_item->get_subtotal() * $days_active_ratio,
+								'total'        => $line_item->get_total() * $days_active_ratio,
+								'subtotal_tax' => $line_item->get_subtotal_tax() * $days_active_ratio,
+								'total_tax'    => $line_item->get_total_tax() * $days_active_ratio,
 								'taxes'        => $taxes,
 							) );
 
