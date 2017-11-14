@@ -191,9 +191,10 @@ class WCSR_Resource extends WC_Data {
 	 * @return int
 	 */
 	public function get_days_active( $from_timestamp, $to_timestamp = null ) {
+		$days_active = 0;
 
 		if ( false === $this->has_been_activated() ) {
-			return 0;
+			return $days_active;
 		}
 
 		if ( is_null( $to_timestamp ) ) {
@@ -204,21 +205,76 @@ class WCSR_Resource extends WC_Data {
 		$activation_times   = self::get_timestamps_between( $this->get_activation_timestamps(), $from_timestamp, $to_timestamp );
 		$deactivation_times = self::get_timestamps_between( $this->get_deactivation_timestamps(), $from_timestamp, $to_timestamp );
 
-		// Now find the number of days between the timestamps where the resource was active (the resource must be inactive for more than 24 hours to be considered inactive for a given day)
-		$days_active = floor( ( $to_timestamp - $from_timestamp ) / DAY_IN_SECONDS );
+		// if the first activation date is after the first deactivation date, make sure we prepend the start timestamp to act as the first "activated" date for the resource
+		if ( ! isset( $activation_times[0] ) || ( isset( $deactivation_times[0] ) && $activation_times[0] > $deactivation_times[0] ) ) {
+			$start_timestamp = ( $this->get_date_created()->getTimestamp() > $from_timestamp ) ? $this->get_date_created()->getTimestamp() : $from_timestamp;
 
-		// First remove any gap between the $from_timestamp and the resources creation date
-		if ( $this->get_date_created()->getTimestamp() > $from_timestamp ) {
-			$days_active -= floor( ( $this->get_date_created()->getTimestamp() - $from_timestamp ) / DAY_IN_SECONDS );
+			// before setting the start timestamp as the created time or the $from_timestamp make sure the deactivation date doesn't come before it
+			if ( isset( $deactivation_times[0] ) && $start_timestamp > $deactivation_times[0] ) {
+				throw new Exception( 'The resource first deactivation date in the period comes before the resource start time or before the beginning of the period. This is invalid.' );
+			}
+
+			array_unshift( $activation_times, $start_timestamp );
 		}
 
 		foreach ( $activation_times as $i => $activation_time ) {
-			if ( isset( $deactivation_times[ $i ] ) ) {
-				$days_active -= floor( ( $activation_time - $deactivation_times[ $i ] ) / DAY_IN_SECONDS );
+			// If there is corresponding deactivation timestamp, the resource has deactivated before the end of the period so that's the time we want, otherwise, use the end of the period as the resource was still active at end of the period
+			$deactivation_time = isset( $deactivation_times[ $i ] ) ? $deactivation_times[ $i ] : $to_timestamp;
+
+			// skip over any days that are activated/deactivated on the same 24 hour block and have already been accounted for
+			if ( $i !== 0 && self::is_on_same_day( $deactivation_time, $deactivation_times[ $i - 1 ], $from_timestamp ) ) {
+				continue;
+			}
+
+			// Calculate days based on time between
+			$days_by_time = intval( ceil( ( $deactivation_time - $activation_time ) / DAY_IN_SECONDS ) );
+
+			// Increase our tally
+			$days_active += $days_by_time;
+
+			// If days based on time is only 1 but it was "across a 24 hour block" we may need to adjust IF NOT accounted for already
+			if ( $days_by_time == 1 && ! self::is_on_same_day( $activation_time, $deactivation_time, $from_timestamp ) ) {
+
+				// handle situation if first activation crosses a 24 hour block
+				if ( $i == 0 && ! self::is_on_same_day( $activation_time, $deactivation_time, $from_timestamp ) ) {
+					$days_active += 1;
+				}
+
+				// if this activation didn't start on the same 24 hour block as previous activation it is safe to add an extra day
+				if ( $i !== 0 && ! self::is_on_same_day( $activation_time, $deactivation_times[ $i - 1 ], $from_timestamp ) ) {
+					$days_active += 1;
+				}
 			}
 		}
 
 		return $days_active;
+	}
+
+	/**
+	 * Conditional check for whether a timestamp is on the same 24 hour block as another timestamp
+	 *
+	 * The catch is the "day" is not typical calendar day - it based on a 24 hour block from the $start_timestamp
+	 *
+	 * Uses the $start_timestamp to loop over and add DAY_IN_SECONDS to the time until it reaches the same 24 hour block as the $compare_timestamp
+	 * This function then checks whether the $current_timestamp and the $compare_timestamp are within the same 24 hour block
+	 *
+	 * @param  int  $current_timestamp The current timestamp being checked
+	 * @param  int  $compare_timestamp The timestamp used to check if the $current_timestamp is on the same 24 hour block
+	 * @param  int  $start_timestamp  The start timestamp of the period (to calculate when the 24 hour blocks start)
+	 * @return boolean true on same 24 hour block | false if not
+	 */
+	protected static function is_on_same_day( $current_timestamp, $compare_timestamp, $start_timestamp ) {
+		for ( $end_of_the_day = $start_timestamp; $end_of_the_day <= $compare_timestamp; $end_of_the_day += DAY_IN_SECONDS ) {
+			// The loop controls take care of incrementing the end day (3rd expression) until the day after the compare date (2nd expression), but we also want to set the start date so we do that here using the current value of end day (which will be the start day in the final iteration as the 3rd expression in the loop hasn't run yet)
+			$start_of_the_day = $end_of_the_day;
+		}
+
+		// Compare timestamp to see if it is within our ranges
+		if ( ( $current_timestamp >= $start_of_the_day ) && ( $current_timestamp < $end_of_the_day ) ) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
