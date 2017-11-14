@@ -251,21 +251,16 @@ class WCSR_Resource extends WC_Data {
 	}
 
 	/**
-	 * Prototype/demo conditional check for whether a timestamp is on the same "day" as another timestamp
+	 * Conditional check for whether a timestamp is on the same 24 hour block as another timestamp
 	 *
 	 * The catch is the "day" is not typical calendar day - it based on a 24 hour period from the $start_timestamp
 	 *
-	 * The $start_timestamp could be the actual time it was first activated of the start of the period.
+	 * Uses the $start_timestamp to loop over and add DAY_IN_SECONDS to the time until it reaches the same 24 hour block as the $compare_timestamp
+	 * This function then checks whether the $current_timestamp and the $compare_timestamp are within the same 24 hour block
 	 *
-	 * Takes the starting timestamp and gets the time our days start from.
-	 * Takes the timestamp we are checking if we are on the same day as and gets the date, previous days date and time
-	 * Works out whether the current day started on the same date as the one we are comparing with or a day earlier and works makes a time stampe fo when the day starts
-	 * Works out when the days ends
-	 * Check if our timestamp is with the start and end dates we have determined
-	 *
-	 * @param  int  $current_timestamp    [description]
-	 * @param  int  $compare_timestamp [description]
-	 * @param  int  $start_timestamp  [description]
+	 * @param  int  $current_timestamp The current timestamp being checked
+	 * @param  int  $compare_timestamp The timestamp used to check if the $current_timestamp is on the same 24 hour block
+	 * @param  int  $start_timestamp  The start timestamp of the period (to calculate when the 24 hour blocks start)
 	 * @return boolean true on same day | false if not
 	 */
 	public static function is_on_same_day( $current_timestamp, $compare_timestamp, $start_timestamp ) {
