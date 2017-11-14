@@ -263,28 +263,10 @@ class WCSR_Resource extends WC_Data {
 	 * @return boolean true on same day | false if not
 	 */
 	public static function is_on_same_day( $current_timestamp, $compare_timestamp, $start_timestamp ) {
-
-		$start_time = gmdate( 'H:i:s', $start_timestamp );
-		$start_hour = gmdate( 'H', $start_timestamp );
-		$start_min  = gmdate( 'i', $start_timestamp );
-		$start_sec  = gmdate( 's', $start_timestamp );
-
-		$compare_day  = gmdate( 'Y-m-d', $compare_timestamp );
-		$compare_day_previous  = gmdate( 'Y-m-d', strtotime( '-1 day', $compare_timestamp ) );
-		$compare_hour = gmdate( 'H', $compare_timestamp );
-		$compare_min  = gmdate( 'i', $compare_timestamp );
-		$compare_sec  = gmdate( 's', $compare_timestamp );
-
-		$start_of_the_day_date_time = $compare_day . ' ' . $start_time;
-		$start_of_the_day = strtotime( $start_of_the_day_date_time );
-
-		// Adjust for H:M:S being less
-		if ( $compare_hour < $start_hour || ( ( $compare_hour == $start_hour ) && ( $compare_min < $start_min ) ) || ( ( $compare_hour == $start_hour ) && ( $compare_min == $start_min ) && ( $compare_sec < $start_sec ) ) ) {
-			$start_of_the_day_date_time = $compare_day_previous . ' ' . $start_time;
-			$start_of_the_day = strtotime( $start_of_the_day_date_time );
+		for ( $end_of_the_day = $start_timestamp; $end_of_the_day <= $compare_timestamp; $end_of_the_day += DAY_IN_SECONDS ) {
+			// The loop controls take care of incrementing the end day (3rd expression) until the day after the compare date (2nd expression), but we also want to set the start date so we do that here using the current value of end day (which will be the start day in the final iteration as the 3rd expression in the loop hasn't run yet)
+			$start_of_the_day = $end_of_the_day;
 		}
-
-		$end_of_the_day = strtotime( '+1 day', $start_of_the_day );
 
 		// Compare timestamp to see if it is within our ranges
 		if ( ( $current_timestamp >= $start_of_the_day ) && ( $current_timestamp < $end_of_the_day ) ) {
