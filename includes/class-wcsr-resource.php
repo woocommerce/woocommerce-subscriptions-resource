@@ -263,7 +263,7 @@ class WCSR_Resource extends WC_Data {
 	 * @param  int  $start_timestamp  The start timestamp of the period (to calculate when the 24 hour blocks start)
 	 * @return boolean true on same day | false if not
 	 */
-	public static function is_on_same_day( $current_timestamp, $compare_timestamp, $start_timestamp ) {
+	protected static function is_on_same_day( $current_timestamp, $compare_timestamp, $start_timestamp ) {
 		for ( $end_of_the_day = $start_timestamp; $end_of_the_day <= $compare_timestamp; $end_of_the_day += DAY_IN_SECONDS ) {
 			// The loop controls take care of incrementing the end day (3rd expression) until the day after the compare date (2nd expression), but we also want to set the start date so we do that here using the current value of end day (which will be the start day in the final iteration as the 3rd expression in the loop hasn't run yet)
 			$start_of_the_day = $end_of_the_day;

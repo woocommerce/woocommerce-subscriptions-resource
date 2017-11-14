@@ -556,7 +556,20 @@ class WCSR_Resource_Test extends PHPUnit_Framework_TestCase {
 	 * @dataProvider provider_is_on_same_day
 	 */
 	public function test_is_on_same_day( $current_timestamp, $compare_timestamp, $start_timestamp, $expected_result ) {
-		$actual_result = WCSR_Resource::is_on_same_day( $current_timestamp, $compare_timestamp, $start_timestamp );
+		$resource_mock = $this->getMockBuilder( 'WCSR_Resource' )->disableOriginalConstructor()->getMock();
+
+		$actual_result = $this->get_accessible_protected_method( $resource_mock, 'is_on_same_day' )->invoke( $resource_mock, $current_timestamp, $compare_timestamp, $start_timestamp );
 		$this->assertEquals( $expected_result, $actual_result );
+	}
+
+	/**
+	 * A utility function to make certain methods public, useful for testing protected methods
+	 * that affect public APIs, but are not public to avoid use due to potential confusion
+	 */
+	protected function get_accessible_protected_method( $object, $method_name ) {
+		$reflected_object = new ReflectionClass( $object );
+		$reflected_method = $reflected_object->getMethod( $method_name );
+		$reflected_method->setAccessible( true );
+		return $reflected_method;
 	}
 }
