@@ -125,10 +125,10 @@ class WCSR_Resource_Manager {
 				if ( ! empty( $resource ) && false === $resource->get_is_pre_paid() && $resource->get_is_prorated() && $resource->has_been_activated() ) {
 
 					// Calculate prorated payments from paid date to match how Subscriptions determine next payment dates.
-					if ( $subscription->get_time( 'last_order_date_paid' ) > 0 ) {
-						$from_timestamp = $subscription->get_time( 'last_order_date_paid' );
-					} elseif ( $subscription->get_time( 'last_order_date_completed' ) > 0 ) {
-						$from_timestamp = $subscription->get_time( 'last_order_date_completed' );
+					if ( $subscription->get_time( 'date_paid' ) > 0 ) {
+						$from_timestamp = $subscription->get_time( 'date_paid' );
+					} elseif ( $subscription->get_time( 'date_completed' ) > 0 ) {
+						$from_timestamp = $subscription->get_time( 'date_completed' );
 					} else {
 						// We can't use last order date created, because that will be the renewal order just created, so go straight to the subscrition start time
 						$from_timestamp = $subscription->get_time( 'date_created' );
