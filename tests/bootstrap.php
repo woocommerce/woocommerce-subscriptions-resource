@@ -53,6 +53,8 @@ class WCSR_Unit_Tests_Bootstrap {
 			// class_alias( 'PHPUnit\Util\GlobalState', 'PHPUnit_Util_GlobalState' );
 			// class_alias( 'PHPUnit\Util\Getopt', 'PHPUnit_Util_Getopt' );
 		}
+
+		require_once( 'framework/class-wcsr-unit-testcase.php' );
 	}
 
 	/**
