@@ -3,7 +3,7 @@
 /**
  * Test the WCS_Retry class's public methods
  */
-class WCSR_Resource_Test extends PHPUnit_Framework_TestCase {
+class WCSR_Resource_Test extends WCSR_Unit_TestCase {
 
 	protected static $from_timestamp;
 
@@ -560,16 +560,5 @@ class WCSR_Resource_Test extends PHPUnit_Framework_TestCase {
 
 		$actual_result = $this->get_accessible_protected_method( $resource_mock, 'is_on_same_day' )->invoke( $resource_mock, $current_timestamp, $compare_timestamp, $start_timestamp );
 		$this->assertEquals( $expected_result, $actual_result );
-	}
-
-	/**
-	 * A utility function to make certain methods public, useful for testing protected methods
-	 * that affect public APIs, but are not public to avoid use due to potential confusion
-	 */
-	protected function get_accessible_protected_method( $object, $method_name ) {
-		$reflected_object = new ReflectionClass( $object );
-		$reflected_method = $reflected_object->getMethod( $method_name );
-		$reflected_method->setAccessible( true );
-		return $reflected_method;
 	}
 }
