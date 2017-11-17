@@ -32,12 +32,27 @@ class WCSR_Unit_Tests_Bootstrap {
 			define( 'DAY_IN_SECONDS', 60 * 60 * 24 );
 		}
 
-		$this->plugin_dir = dirname( dirname( __FILE__ ) );
+		if ( ! defined( 'WEEK_IN_SECONDS' ) ) {
+			define( 'WEEK_IN_SECONDS', 60 * 60 * 24 * 7 );
+		}
+
+		if ( ! defined( 'MONTH_IN_SECONDS' ) ) {
+			define( 'MONTH_IN_SECONDS', 60 * 60 * 24 * 30 );
+		}
+
+		if ( ! defined( 'YEAR_IN_SECONDS' ) ) {
+			define( 'YEAR_IN_SECONDS', 60 * 60 * 24 * 365 );
+		}
+
+		$this->tests_dir   = dirname( __FILE__ );
+		$this->plugin_dir  = dirname( $this->tests_dir );
+		$this->modules_dir = dirname( dirname( $this->tests_dir ) );
 
 		// Define a mock WC_Data object rather than requiring WooCommerce (we shouldn't be relying on or testing any WC_Data methods anyway)
 		require_once( 'mocks/class-wc-data.php' );
 
 		require_once( $this->plugin_dir . '/includes/class-wcsr-resource.php' );
+		require_once( $this->modules_dir . '/woocommerce-subscriptions/includes/wcs-time-functions.php' );
 
 		// Load relevant class aliases for PHPUnit 6 (ran on PHP v7.0+ in Travis)
 		if ( class_exists( 'PHPUnit\Runner\Version' ) && version_compare( PHPUnit\Runner\Version::id(), '6.0', '>=' ) ) {

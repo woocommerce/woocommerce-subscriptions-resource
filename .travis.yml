@@ -1,7 +1,7 @@
 language: php
 
 sudo: false
- 
+
 notifications:
   email: false
 
@@ -19,7 +19,10 @@ branches:
   only:
     - master
 
-script: 
+before_script:
+  - bash tests/bin/travis.sh before
+
+script:
   - phpunit -c phpunit.xml --coverage-clover clover.xml
 
 after_script:
