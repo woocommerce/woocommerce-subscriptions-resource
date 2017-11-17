@@ -561,4 +561,64 @@ class WCSR_Resource_Test extends WCSR_Unit_TestCase {
 		$actual_result = $this->get_accessible_protected_method( $resource_mock, 'is_on_same_day' )->invoke( $resource_mock, $current_timestamp, $compare_timestamp, $start_timestamp );
 		$this->assertEquals( $expected_result, $actual_result );
 	}
+
+	/**
+	 * Procide data to test days in period
+	 */
+	public function provider_get_days_in_period() {
+		return array(
+			// end comes before start
+			0 => array(
+				'start_timestamp' => strtotime( '2017-09-14 14:21:40' ),
+				'end_timestamp'   => strtotime( '2017-09-13 14:21:40' ),
+				'expected_result' => 0,
+			),
+
+			// exactly 1 day
+			1 => array(
+				'start_timestamp' => strtotime( '2017-09-14 14:21:40' ),
+				'end_timestamp'   => strtotime( '2017-09-15 14:21:40' ),
+				'expected_result' => 1,
+			),
+
+			// just before 1 day
+			2 => array(
+				'start_timestamp' => strtotime( '2017-09-14 14:21:40' ),
+				'end_timestamp'   => strtotime( '2017-09-15 14:20:40' ),
+				'expected_result' => 0,
+			),
+
+			// just after 1 day
+			3 => array(
+				'start_timestamp' => strtotime( '2017-09-14 14:21:40' ),
+				'end_timestamp'   => strtotime( '2017-09-15 14:22:40' ),
+				'expected_result' => 1,
+			),
+
+			// standard 1 month renewal period
+			4 => array(
+				'start_timestamp' => strtotime( '2017-09-14 14:21:40' ),
+				'end_timestamp'   => strtotime( '2017-10-14 14:26:30' ),
+				'expected_result' => 30,
+			),
+
+			5 => array(
+				'start_timestamp' => strtotime( '2017-09-14 14:21:40' ),
+				'end_timestamp'   => strtotime( '2017-09-14 14:21:40' ),
+				'expected_result' => 0,
+			),
+		);
+	}
+
+	/**
+	 * Make sure get_days_in_period() is calculating the number of days properly
+	 *
+	 *
+	 * @dataProvider provider_get_days_in_period
+	 * @group days_in_period
+	 */
+	public function test_get_days_in_period( $start_timestamp, $end_timestamp, $expected_result ) {
+		$resource_mock = $this->getMockBuilder( 'WCSR_Resource' )->setMethods( array( 'get_date_created' ) )->disableOriginalConstructor()->getMock();
+		$this->assertEquals( $expected_result, $resource_mock->get_days_in_period( $start_timestamp, $end_timestamp ) );
+	}
 }
