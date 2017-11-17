@@ -251,6 +251,26 @@ class WCSR_Resource extends WC_Data {
 	}
 
 	/**
+	 * Calculates the number of whole (i.e. using floor) days between two timestamps.
+	 * Uses the same logic in @see wcs_estimate_periods_between() but this function exclusively calculates the number of days
+	 *
+	 * @since 1.1.0
+	 * @param int $start_timestamp The starting timestamp to calculate the number of days from
+	 * @param int $end_timestamp   The end timestamp to calculate the number of days to
+	 * @return int
+	 */
+	public function get_days_in_period( $start_timestamp, $end_timestamp ) {
+		// return 0 if the start timestamp is after the end timestamp
+		$periods_until = 0;
+
+		if ( $end_timestamp > $start_timestamp ) {
+			$periods_until = floor( ( $end_timestamp - $start_timestamp ) / DAY_IN_SECONDS );
+		}
+
+		return $periods_until;
+	}
+
+	/**
 	 * Conditional check for whether a timestamp is on the same 24 hour block as another timestamp
 	 *
 	 * The catch is the "day" is not typical calendar day - it based on a 24 hour block from the $start_timestamp
