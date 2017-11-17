@@ -242,7 +242,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 	 */
 	public function get_resource_ids_for_subscription( $subscription_id, $status = 'any' ) {
 
-		if ( ! in_array( $status, wcsr_get_valid_statuses() ) ) {
+		if ( ! in_array( $status, wcsr_get_valid_statuses() ) && 'any' !== $status ) {
 			throw new InvalidArgumentException( sprintf( '2nd parameter must be a valid resource status. One of: %s.', implode( ',', wcsr_get_valid_statuses() ) ) );
 		}
 
