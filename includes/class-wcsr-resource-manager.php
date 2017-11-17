@@ -137,9 +137,9 @@ class WCSR_Resource_Manager {
 					$from_timestamp = apply_filters( 'wcsr_renewal_proration_from_timetamp', $from_timestamp, $subscription, $renewal_order, $resource );
 
 					// Now add a prorated line item for each resource based on the resource's usage for this period
-					$days_active_ratio = ( $days_active >= $days_in_period ) ? 1 : $days_active / $days_in_period; // calculate the days active to days in period ratio. If the active days is more than the days in period make sure we return 1
 					$days_in_period    = $resource->get_days_in_period( $from_timestamp, $renewal_order->get_date_created()->getTimestamp() );
 					$days_active       = $resource->get_days_active( $from_timestamp, $renewal_order->get_date_created()->getTimestamp() );
+					$days_active_ratio = $resource->get_active_days_ratio( $from_timestamp, $days_in_period, $days_active, $subscription->get_billing_period(), $subscription->get_billing_interval() );
 
 					foreach ( $line_items as $line_item ) {
 

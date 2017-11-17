@@ -1,0 +1,148 @@
+<?php
+/**
+ * Test the WCSR_Resource class's get active days ratio methods
+ */
+class WCSR_Active_Days_Ratio_Test extends WCSR_Unit_TestCase {
+
+	public function provider_get_active_days_ratio() {
+		return array(
+			// standard 30 day month
+			0 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 30,
+				'days_active'      => 30,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 1
+			),
+
+			// days in period was 61 day, but the billing period is only 1 month (i.e. the last renewal failed, but the subscription was manually activated)
+			1 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 61,
+				'days_active'      => 61,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 2
+			),
+
+			// Resource was active for 45 days in 61 days (i.e. the last renewal failed, but the subscription was manually activated)
+			2 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 61,
+				'days_active'      => 45,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 1.48
+			),
+
+			// if the last payment failed for a monthly subscription and was manually reactivated - resource was active for a total of 45 out of the 61 days
+			3 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 61,
+				'days_active'      => 45,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 1.48
+			),
+
+			// if the last payment failed for a monthly subscription and was manually reactivated - resource remained active for the entire time
+			4 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 61,
+				'days_active'      => 61,
+				'billing_period'   => 'month',
+				'billing_interval' => 2,
+				'expected_ratio'  => 1
+			),
+
+			5 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 15,
+				'days_active'      => 15,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 0.5
+			),
+
+			// Months July/August both have 31 days.. so there's a possibility that the total days in period could be 62
+			6 => array(
+				'from_timestamp'   => '2017-07-14 14:21:40',
+				'days_in_period'   => 62,
+				'days_active'      => 62,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 2
+			),
+
+			// Same test as above but this time the billing cycle of the subscription is every 2 months
+			7 => array(
+				'from_timestamp'   => '2017-07-14 14:21:40',
+				'days_in_period'   => 62,
+				'days_active'      => 62,
+				'billing_period'   => 'month',
+				'billing_interval' => 2,
+				'expected_ratio'  => 1
+			),
+
+			// test a monthly subscription renewing across Feb in a non-leap year (28 days)
+			8 => array(
+				'from_timestamp'   => '2017-02-01 14:21:40',
+				'days_in_period'   => 28,
+				'days_active'      => 28,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 1
+			),
+
+			9 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 61,
+				'days_active'      => 1,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 0.03
+			),
+
+			// simple test for 20 active days out of the full month in September
+			10 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 30,
+				'days_active'      => 20,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 0.67
+			),
+
+			11 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 61,
+				'days_active'      => 40,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 1.31
+			),
+
+			// if the subscription was active for all of Sept and then deactiveated it for October they should pay $9.00 for Sept, so the ratio should be 1
+			12 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 61,
+				'days_active'      => 30,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 0.98 // i feel like this should be 1, not .98. i.e. the 30 active days could've been all of September so that should be $9.00 they get charged.. not $8.82
+			),
+		);
+	}
+
+	/**
+	 * Make sure get_days_in_period() is calculating the number of days properly
+	 *
+	 * @group days_ratio
+	 * @dataProvider provider_get_active_days_ratio
+	 */
+	public function test_get_active_days_ratio( $from_timestamp, $days_in_period, $days_active, $billing_period, $billing_interval, $expected_ratio ) {
+		$resource_mock = $this->getMockBuilder( 'WCSR_Resource' )->setMethods( array( 'get_date_created' ) )->disableOriginalConstructor()->getMock();
+		$this->assertEquals( $expected_ratio, $resource_mock->get_active_days_ratio( strtotime( $from_timestamp ), $days_in_period, $days_active, $billing_period, $billing_interval ) );
+	}
+}
