@@ -142,40 +142,7 @@ class WCSR_Resource_Manager {
 					$days_active_ratio = $resource->get_active_days_ratio( $from_timestamp, $days_in_period, $days_active, $subscription->get_billing_period(), $subscription->get_billing_interval() );
 
 					foreach ( $line_items as $line_item ) {
-
-						$new_item = new WC_Order_Item_Product();
-
-						wcs_copy_order_item( $line_item, $new_item );
-
-						// Maybe prorate the totals
-						if ( $days_active != $days_in_period ) {
-							$taxes = $line_item->get_taxes();
-
-							foreach( $taxes as $total_type => $tax_values ) {
-								foreach( $tax_values as $tax_id => $tax_value ) {
-									$taxes[ $total_type ][ $tax_id ] = $tax_value * $days_active_ratio;
-								}
-							}
-
-							$new_item->set_props( array(
-								'subtotal'     => $line_item->get_subtotal() * $days_active_ratio,
-								'total'        => $line_item->get_total() * $days_active_ratio,
-								'subtotal_tax' => $line_item->get_subtotal_tax() * $days_active_ratio,
-								'total_tax'    => $line_item->get_total_tax() * $days_active_ratio,
-								'taxes'        => $taxes,
-							) );
-
-							$line_item_name = sprintf( '%s usage for %d of %d days.', $line_item->get_name(), $days_active, $days_in_period );
-
-						} else {
-
-							$line_item_name = $line_item->get_name();
-
-						}
-
-						$line_item_name = apply_filters( 'wcsr_renewal_line_item_name', $line_item_name, $resource, $line_item, $days_active, $days_in_period );
-
-						$new_item->set_name( $line_item_name );
+						$new_item = self::get_prorated_resource_line_item( $resource, $line_item, $days_in_period, $days_active, $days_active_ratio );
 
 						// Add item to order
 						$renewal_order->add_item( $new_item );
@@ -219,6 +186,50 @@ class WCSR_Resource_Manager {
 		$resource_class = self::get_resource_class( $resource_id );
 
 		return new $resource_class( $resource_id );
+	}
+
+	/**
+	 * Returns the new line item for the resource with updated the line item totals if prorating is required
+	 *
+	 * @since 1.1.0
+	 * @param WCSR_Resource $resource
+	 * @param WC_Order_Item_Product $line_item The existing line item on the renewal order
+	 * @param int $days_in_period The number of days in the current period being billed
+	 * @param int $days_active The number of active dates in the current period being billed
+	 * @param float $days_active_ratio The ratio of days active to days in the billing period
+	 * @return WC_Order_Item_Product
+	 */
+	protected static function get_prorated_resource_line_item( $resource, $line_item, $days_in_period, $days_active, $days_active_ratio ) {
+		$new_item = new WC_Order_Item_Product();
+		wcs_copy_order_item( $line_item, $new_item );
+
+		// Maybe prorate the totals
+		if ( $days_active != $days_in_period ) {
+			$taxes = $line_item->get_taxes();
+
+			foreach( $taxes as $total_type => $tax_values ) {
+				foreach( $tax_values as $tax_id => $tax_value ) {
+					$taxes[ $total_type ][ $tax_id ] = $tax_value * $days_active_ratio;
+				}
+			}
+
+			$new_item->set_props( array(
+				'subtotal'     => $line_item->get_subtotal() * $days_active_ratio,
+				'total'        => $line_item->get_total() * $days_active_ratio,
+				'subtotal_tax' => $line_item->get_subtotal_tax() * $days_active_ratio,
+				'total_tax'    => $line_item->get_total_tax() * $days_active_ratio,
+				'taxes'        => $taxes,
+			) );
+
+			$line_item_name = sprintf( '%s usage for %d of %d days.', $line_item->get_name(), $days_active, $days_in_period );
+		} else {
+			$line_item_name = $line_item->get_name();
+		}
+
+		$line_item_name = apply_filters( 'wcsr_renewal_line_item_name', $line_item_name, $resource, $line_item, $days_active, $days_in_period );
+
+		$new_item->set_name( $line_item_name );
+		return $new_item;
 	}
 
 	/**
