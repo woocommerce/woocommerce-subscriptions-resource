@@ -137,13 +137,14 @@ class WCSR_Resource_Manager {
 					$from_timestamp = apply_filters( 'wcsr_renewal_proration_from_timetamp', $from_timestamp, $subscription, $renewal_order, $resource );
 					$to_timestamp   = $renewal_order->get_date_created()->getTimestamp();
 
-					// Now add a prorated line item for each resource based on the resource's usage for this period
-					$days_in_period    = $resource->get_days_in_period( $from_timestamp, $to_timestamp );
+					// Calculate the usage and the ratio of active days vs days in the period
 					$days_active       = $resource->get_days_active( $from_timestamp, $to_timestamp );
-					$days_active_ratio = $resource->get_active_days_ratio( $from_timestamp, $days_in_period, $days_active, $subscription->get_billing_period(), $subscription->get_billing_interval() );
+					$days_in_period    = wcsr_get_days_in_period( $from_timestamp, $to_timestamp );
+					$days_active_ratio = wcsr_get_active_days_ratio( $from_timestamp, $days_in_period, $days_active, $subscription->get_billing_period(), $subscription->get_billing_interval() );
 
 					foreach ( $line_items as $line_item ) {
 
+						// Now add a prorated line item for the resource based on the resource's usage for this period
 						$line_item_name = ( $days_active != $days_in_period ) ? sprintf( '%s usage for %d of %d days.', $line_item->get_name(), $days_active, $days_in_period ) : $line_item->get_name();
 						$line_item_name = apply_filters( 'wcsr_renewal_line_item_name', $line_item_name, $resource, $line_item, $days_active, $days_in_period, $from_timestamp, $to_timestamp );
 

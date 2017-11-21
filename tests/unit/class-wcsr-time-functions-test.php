@@ -2,7 +2,7 @@
 /**
  * Test the WCSR_Resource class's get active days ratio methods
  */
-class WCSR_Active_Days_Ratio_Test extends WCSR_Unit_TestCase {
+class WCSR_Time_Functions_Test extends WCSR_Unit_TestCase {
 
 	public function provider_get_active_days_ratio() {
 		return array(
@@ -213,7 +213,65 @@ class WCSR_Active_Days_Ratio_Test extends WCSR_Unit_TestCase {
 	 * @dataProvider provider_get_active_days_ratio
 	 */
 	public function test_get_active_days_ratio( $from_timestamp, $days_in_period, $days_active, $billing_period, $billing_interval, $expected_ratio ) {
-		$resource_mock = $this->getMockBuilder( 'WCSR_Resource' )->setMethods( array( 'get_date_created' ) )->disableOriginalConstructor()->getMock();
-		$this->assertEquals( $expected_ratio, $resource_mock->get_active_days_ratio( strtotime( $from_timestamp ), $days_in_period, $days_active, $billing_period, $billing_interval ) );
+		$this->assertEquals( $expected_ratio, wcsr_get_active_days_ratio( strtotime( $from_timestamp ), $days_in_period, $days_active, $billing_period, $billing_interval ) );
+	}
+
+	/**
+	 * Procide data to test days in period
+	 */
+	public function provider_get_days_in_period() {
+		return array(
+			// end comes before start
+			0 => array(
+				'start_timestamp' => strtotime( '2017-09-14 14:21:40' ),
+				'end_timestamp'   => strtotime( '2017-09-13 14:21:40' ),
+				'expected_result' => 0,
+			),
+
+			// exactly 1 day
+			1 => array(
+				'start_timestamp' => strtotime( '2017-09-14 14:21:40' ),
+				'end_timestamp'   => strtotime( '2017-09-15 14:21:40' ),
+				'expected_result' => 1,
+			),
+
+			// just before 1 day
+			2 => array(
+				'start_timestamp' => strtotime( '2017-09-14 14:21:40' ),
+				'end_timestamp'   => strtotime( '2017-09-15 14:20:40' ),
+				'expected_result' => 0,
+			),
+
+			// just after 1 day
+			3 => array(
+				'start_timestamp' => strtotime( '2017-09-14 14:21:40' ),
+				'end_timestamp'   => strtotime( '2017-09-15 14:22:40' ),
+				'expected_result' => 1,
+			),
+
+			// standard 1 month renewal period
+			4 => array(
+				'start_timestamp' => strtotime( '2017-09-14 14:21:40' ),
+				'end_timestamp'   => strtotime( '2017-10-14 14:26:30' ),
+				'expected_result' => 30,
+			),
+
+			5 => array(
+				'start_timestamp' => strtotime( '2017-09-14 14:21:40' ),
+				'end_timestamp'   => strtotime( '2017-09-14 14:21:40' ),
+				'expected_result' => 0,
+			),
+		);
+	}
+
+	/**
+	 * Make sure get_days_in_period() is calculating the number of days properly
+	 *
+	 *
+	 * @dataProvider provider_get_days_in_period
+	 * @group days_in_period
+	 */
+	public function test_get_days_in_period( $start_timestamp, $end_timestamp, $expected_result ) {
+		$this->assertEquals( $expected_result, wcsr_get_days_in_period( $start_timestamp, $end_timestamp ) );
 	}
 }

@@ -53,8 +53,12 @@ class WCSR_Unit_Tests_Bootstrap {
 		require_once( 'mocks/function-mocks.php' );
 		require_once( 'mocks/class-wc-order_item_product.php' );
 
+		// Load relevant Resource plugin files
+		require_once( $this->plugin_dir . '/includes/wcsr-time-functions.php' );
 		require_once( $this->plugin_dir . '/includes/class-wcsr-resource.php' );
 		require_once( $this->plugin_dir . '/includes/class-wcsr-resource-manager.php' );
+
+		// Load WooCommerce Subscription files
 		require_once( $this->modules_dir . '/woocommerce-subscriptions/includes/wcs-time-functions.php' );
 
 		// Load relevant class aliases for PHPUnit 6 (ran on PHP v7.0+ in Travis)
