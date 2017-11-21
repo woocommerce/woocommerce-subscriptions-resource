@@ -485,16 +485,11 @@ class WCSR_Resource extends WC_Data {
 				$days_in_period -= $extra_days_in_cycle;
 			}
 
-			// If the
-			if ( $days_active > $days_in_period && $extra_days_in_cycle < 0 ) {
-				throw new Exception( 'Number of days active exceeds days in period, and there are no extra days in this billing cycle which would account for that.' ); // @todo probably also worth including more data in this exception to help diagnose the issue.
-			}
-
 			$ratio = round( $days_active / $days_in_period, 2 );
 		}
 
-
-		// Now calculate $days_active_ratio
 		return $ratio;
 	}
+
+
 }
