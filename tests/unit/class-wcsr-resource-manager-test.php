@@ -92,8 +92,7 @@ class WCSR_Resource_Manager_Test extends WCSR_Unit_TestCase {
 
 		// mock the resource manager class and a resource object for sending to get_prorated_resource_line_item
 		$resource_manager_mock = $this->getMockBuilder( 'WCSR_Resource_Manager' )->setMethods( array( 'get_prorated_resource_line_item' ) )->disableOriginalConstructor()->getMock();
-		$resource_mock         = $this->getMockBuilder( 'WCSR_Resource' )->setMethods( array( 'get_date_created' ) )->disableOriginalConstructor()->getMock();
 
-		$this->assertEquals( $expected_result, $this->get_accessible_protected_method( 'WCSR_Resource_Manager', 'get_prorated_resource_line_item' )->invoke( $resource_manager_mock, $resource_mock, $line_item_mock, $days_in_period, $days_active, $days_active_ratio ) );
+		$this->assertEquals( $expected_result, $this->get_accessible_protected_method( 'WCSR_Resource_Manager', 'get_prorated_resource_line_item' )->invoke( $resource_manager_mock, $line_item_mock, $days_in_period, $days_active, $days_active_ratio ) );
 	}
 }
