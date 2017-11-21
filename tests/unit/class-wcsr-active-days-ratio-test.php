@@ -56,6 +56,7 @@ class WCSR_Active_Days_Ratio_Test extends WCSR_Unit_TestCase {
 				'expected_ratio'  => 1
 			),
 
+			// this tests the case where a subscription was cancelled mid way through the month or if the subscription was renewed manually early (for whatever reason)
 			5 => array(
 				'from_timestamp'   => '2017-09-14 14:21:40',
 				'days_in_period'   => 15,
@@ -131,6 +132,76 @@ class WCSR_Active_Days_Ratio_Test extends WCSR_Unit_TestCase {
 				'billing_period'   => 'month',
 				'billing_interval' => 1,
 				'expected_ratio'  => 0.98 // i feel like this should be 1, not .98. i.e. the 30 active days could've been all of September so that should be $9.00 they get charged.. not $8.82
+			),
+
+			// If somehow the days active is 31 (this calculastion uses ceil) but only 30 days in the period (floor is used in this calculation), make sure we return 1
+			13 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 30,
+				'days_active'      => 31,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 1
+			),
+
+			// if the monthly subscription renews but only has 15 days active
+			14 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 30,
+				'days_active'      => 15,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 0.5
+			),
+
+			// 31 days in the period from August (full month)
+			15 => array(
+				'from_timestamp'   => '2017-08-14 14:21:40',
+				'days_in_period'   => 31,
+				'days_active'      => 31,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 1
+			),
+
+			// 31 days in the period from September (full month + 1 day (i.e. maybe the renewal was a day late))
+			16 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 31,
+				'days_active'      => 31,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 1.03 // the renewal came late so they should be charged 1 month + 1 day.
+			),
+
+			// 0 case - no days in the period and 0 days active (only feasible scenario i can see this ever happening is if the renewal was manually triggered and days in period ends up being less than 1 day (i.e. floor is used so it would be 0), but because we use CEIL when calculating the active days that value could be 1)
+			17 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 0,
+				'days_active'      => 1,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 0
+			),
+
+			// 0 case
+			17 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 0,
+				'days_active'      => 0,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 0
+			),
+
+			// no active days in the period
+			18 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 30,
+				'days_active'      => 0,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 0 // the renewal came late so they should be charged 1 month + 1 day.
 			),
 		);
 	}
