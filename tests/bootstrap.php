@@ -50,8 +50,11 @@ class WCSR_Unit_Tests_Bootstrap {
 
 		// Define a mock WC_Data object rather than requiring WooCommerce (we shouldn't be relying on or testing any WC_Data methods anyway)
 		require_once( 'mocks/class-wc-data.php' );
+		require_once( 'mocks/function-mocks.php' );
+		require_once( 'mocks/class-wc-order_item_product.php' );
 
 		require_once( $this->plugin_dir . '/includes/class-wcsr-resource.php' );
+		require_once( $this->plugin_dir . '/includes/class-wcsr-resource-manager.php' );
 		require_once( $this->modules_dir . '/woocommerce-subscriptions/includes/wcs-time-functions.php' );
 
 		// Load relevant class aliases for PHPUnit 6 (ran on PHP v7.0+ in Travis)
