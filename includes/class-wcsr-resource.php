@@ -449,31 +449,35 @@ class WCSR_Resource extends WC_Data {
 	 * @return float
 	 */
 	public function get_active_days_ratio( $from_timestamp, $days_in_period, $days_active, $billing_period, $billing_interval ) {
-		$original_days_in_period = $days_in_period; // keep the original days in period so that we know if
-		$days_in_billing_cycle   = $counter = $number_of_billing_periods = 0;
+		$days_in_billing_cycle = $counter = $number_of_billing_periods = 0;
+		$days_left_in_period   = $days_in_period;
 
 		// count the number of days in a billing cycle and the number of billing periods (can be float value i.e. 15 days is 0.5 number of periods of a monthly subscription)
-		while ( $days_in_billing_cycle < $days_in_period && $counter < 50 ) {
+		while ( $days_left_in_period > 0 && $counter < 50 ) {
 			$next_timestamp         = wcs_add_time( $billing_interval, $billing_period, $from_timestamp ); // use the same function used to calculate subscription billing periods to work out the exact billing
 			$days_in_billing_period = $this->get_days_in_period( $from_timestamp, $next_timestamp );
 			$days_in_billing_cycle += $days_in_billing_period;
 
-			if ( $days_in_period >= $days_in_billing_cycle ) {
+			if ( $days_left_in_period >= $days_in_billing_period ) {
 				$number_of_billing_periods++;
-			} else {
-				$number_of_billing_periods += round( ( $days_in_billing_cycle - $days_in_period ) / $days_in_billing_period, 2 );
+			} elseif( $days_left_in_period < $days_in_billing_period ) { // days in period
+				$number_of_billing_periods += round( $days_left_in_period / $days_in_billing_period, 2 );
+				break;
+			} elseif ( $days_left_in_period < $days_in_billing_period ) { // days in period don't even reach the full first billing period
+				$number_of_billing_periods += round( $days_left_in_period / $days_in_billing_period, 2 );
 				break;
 			}
 
 			$counter++;
-			$from_timestamp = $next_timestamp;
+			$days_left_in_period -= $days_in_billing_period;
+			$from_timestamp       = $next_timestamp;
 		}
 
-		// if the number of days active is more than the days in period - default to the number of billing periods (remember this can be a float or whole number i.e. 15 day period of a monthly subscription is only 0.5)
+		// if the number of days active is more than or equal to the days in the period - return the exact number of billing periods (remember this can be a float or whole number i.e. 15 day period of a monthly subscription is only 0.5)
 		if ( $days_active >= $days_in_period ) {
 			$ratio = $number_of_billing_periods;
 		} else {
-			// If there are 2 or more extra days in this cycle, then either the subscription has been suspended for one or more payments, or the more recent renewal order/s may have failed and the subscription has been manually reactivated, so we need to remove the extra days in the period to account for the extra days to make sure the ratio used to determine daily rates reflects the increased time period.
+			// If there are more extra days in this cycle, then either the subscription has been suspended for one or more payments, or the more recent renewal order/s may have failed and the subscription has been manually reactivated, so we need to remove the extra days in the period to account for the extra days to make sure the ratio used to determine daily rates reflects the increased time period.
 			$extra_days_in_cycle = $days_in_period - ( $days_in_billing_cycle / $number_of_billing_periods );
 
 			// now that we have the exact amount of days in the billing cycle, we don't need to account for 2 days like the code example given in https://github.com/Prospress/woocommerce-subscriptions-resource/pull/16#issuecomment-344707347
