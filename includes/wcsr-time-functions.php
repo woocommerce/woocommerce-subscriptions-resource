@@ -93,3 +93,24 @@ function wcsr_get_days_in_period( $start_timestamp, $end_timestamp ) {
 
 	return $periods_until;
 }
+
+/**
+ * Find all the timestamps from a given array that fall within a from/to timestamp range.
+ *
+ * @param array $timestamps_to_check
+ * @param int $from_timestamp
+ * @param int $to_timestamp
+ * @return array
+ */
+function wcsr_get_timestamps_between( $timestamps_to_check, $from_timestamp, $to_timestamp ) {
+
+	$times = array();
+
+	foreach ( $timestamps_to_check as $i => $timestamp ) {
+		if ( $timestamp >= $from_timestamp && $timestamp <= $to_timestamp ) {
+			$times[ $i ] = $timestamp;
+		}
+	}
+
+	return $times;
+}

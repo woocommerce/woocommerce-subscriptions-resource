@@ -202,8 +202,8 @@ class WCSR_Resource extends WC_Data {
 		}
 
 		// Find all the activation and deactivation timestamps between the given timestamps
-		$activation_times   = self::get_timestamps_between( $this->get_activation_timestamps(), $from_timestamp, $to_timestamp );
-		$deactivation_times = self::get_timestamps_between( $this->get_deactivation_timestamps(), $from_timestamp, $to_timestamp );
+		$activation_times   = wcsr_get_timestamps_between( $this->get_activation_timestamps(), $from_timestamp, $to_timestamp );
+		$deactivation_times = wcsr_get_timestamps_between( $this->get_deactivation_timestamps(), $from_timestamp, $to_timestamp );
 
 		// if the first activation date is after the first deactivation date, make sure we prepend the start timestamp to act as the first "activated" date for the resource
 		if ( ! isset( $activation_times[0] ) || ( isset( $deactivation_times[0] ) && $activation_times[0] > $deactivation_times[0] ) ) {
@@ -275,27 +275,6 @@ class WCSR_Resource extends WC_Data {
 		} else {
 			return false;
 		}
-	}
-
-	/**
-	 * Find all the timestamps from a given array that fall within a from/to timestamp range.
-	 *
-	 * @param array $timestamps_to_check
-	 * @param int $from_timestamp
-	 * @param int $to_timestamp
-	 * @return array
-	 */
-	protected static function get_timestamps_between( $timestamps_to_check, $from_timestamp, $to_timestamp ) {
-
-		$times = array();
-
-		foreach ( $timestamps_to_check as $i => $timestamp ) {
-			if ( $timestamp >= $from_timestamp && $timestamp <= $to_timestamp ) {
-				$times[ $i ] = $timestamp;
-			}
-		}
-
-		return $times;
 	}
 
 	/**
