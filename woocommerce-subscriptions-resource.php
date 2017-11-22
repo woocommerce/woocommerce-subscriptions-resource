@@ -42,6 +42,7 @@ function wcsr_init() {
 	if ( defined( 'WC_VERSION' ) && version_compare( WC_VERSION, '3.0.0', '>=' ) && ! class_exists( 'WCSR_Resource' ) ) {
 		require_once( 'includes/wcsr-functions.php' );
 		require_once( 'includes/wcsr-time-functions.php' );
+		require_once( 'includes/wcsr-renewal-functions.php' );
 		require_once( 'includes/class-wcsr-resource.php' );
 		require_once( 'includes/class-wcsr-data-store.php' );
 		require_once( 'includes/class-wcsr-resource-data-store-cpt.php' );

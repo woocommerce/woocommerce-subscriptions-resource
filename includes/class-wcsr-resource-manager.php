@@ -145,12 +145,10 @@ class WCSR_Resource_Manager {
 					foreach ( $line_items as $line_item ) {
 
 						// Now add a prorated line item for the resource based on the resource's usage for this period
-						$line_item_name = ( $days_active != $days_in_period ) ? sprintf( '%s usage for %d of %d days.', $line_item->get_name(), $days_active, $days_in_period ) : $line_item->get_name();
-						$line_item_name = apply_filters( 'wcsr_renewal_line_item_name', $line_item_name, $resource, $line_item, $days_active, $days_in_period, $from_timestamp, $to_timestamp );
-
 						$new_item = self::get_prorated_resource_line_item( $line_item, $days_active_ratio );
 
 						$new_item->set_name( $line_item_name );
+						$new_item->set_name( wcsr_get_line_item_name( $new_item, $days_active, $days_in_period, $resource, $from_timestamp, $to_timestamp ) );
 
 						// Add item to order
 						$renewal_order->add_item( $new_item );
