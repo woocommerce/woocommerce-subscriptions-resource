@@ -73,4 +73,43 @@ class WCSR_Renewal_Functions_Test extends WCSR_Unit_TestCase {
 
 		$this->assertEquals( $expected_result, wcsr_get_prorated_line_item( $line_item_mock, $days_active_ratio ) );
 	}
+
+	public function provider_get_line_item_name() {
+		return array (
+			// prorated line item name
+			0 => array(
+				'days_active'    => 20,
+				'days_in_period' => 30,
+				'expected'       => 'Robot Ninja usage for 20 of 30 days.',
+			),
+
+			// non-prorated line item name
+			1 => array(
+				'days_active'    => 30,
+				'days_in_period' => 30,
+				'expected'       => 'Robot Ninja',
+			),
+
+			// impossible case
+			2 => array(
+				'days_active'    => 31,
+				'days_in_period' => 30,
+				'expected'       => 'Robot Ninja usage for 31 of 30 days.',
+			),
+		);
+	}
+
+	/**
+	 * Test the line_item_name string returned from wcsr_get_line_item_name()
+	 *
+	 * @dataProvider provider_get_line_item_name
+	 * @group prorated_line_items
+	 */
+	public function test_get_line_item_name( $days_active, $days_in_period, $expected ) {
+		// Mock the line item object and line item methods used within WCSR_Resource_Manager::get_prorated_resource_line_item() function
+		$line_item_mock = $this->getMockBuilder( 'WC_Order_Item_Product' )->setMethods( array( 'get_name' ) )->disableOriginalConstructor()->getMock();
+		$line_item_mock->expects( $this->any() )->method( 'get_name' )->will( $this->returnValue( self::$product_name ) );
+
+		$this->assertEquals( $expected, wcsr_get_line_item_name( $line_item_mock, $days_active, $days_in_period ) );
+	}
 }
