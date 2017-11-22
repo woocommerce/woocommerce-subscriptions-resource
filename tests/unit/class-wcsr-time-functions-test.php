@@ -274,4 +274,142 @@ class WCSR_Time_Functions_Test extends WCSR_Unit_TestCase {
 	public function test_get_days_in_period( $start_timestamp, $end_timestamp, $expected_result ) {
 		$this->assertEquals( $expected_result, wcsr_get_days_in_period( $start_timestamp, $end_timestamp ) );
 	}
+
+	/**
+	 * Provide data to whether timestamp is on same day
+	 */
+	public function provider_is_on_same_day() {
+		return array(
+
+			// Exactly start of same day 00:00:00
+			0 => array(
+				'current_timestamp' => strtotime( '2017-09-14 09:13:14' ),
+				'compare_timestamp' => strtotime( '2017-09-14 09:13:14' ),
+				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
+				'expected_result'   => true,
+			),
+
+			// Just within the same day 23:59:59
+			1 => array(
+				'current_timestamp' => strtotime( '2017-09-15 09:13:13' ),
+				'compare_timestamp' => strtotime( '2017-09-14 09:13:14' ),
+				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
+				'expected_result'   => true,
+			),
+
+			// start of the next day 00:00:00
+			2 => array(
+				'current_timestamp' => strtotime( '2017-09-15 09:13:14' ),
+				'compare_timestamp' => strtotime( '2017-09-14 09:13:14' ),
+				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
+				'expected_result'   => false,
+			),
+
+			// move comparison date and increase current second
+			3 => array(
+				'current_timestamp' => strtotime( '2017-09-20 09:13:14' ),
+				'compare_timestamp' => strtotime( '2017-09-19 09:13:14' ),
+				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
+				'expected_result'   => false,
+			),
+
+			// move comparison date and decrease current second
+			4 => array(
+				'current_timestamp' => strtotime( '2017-09-20 09:13:13' ),
+				'compare_timestamp' => strtotime( '2017-09-19 09:13:14' ),
+				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
+				'expected_result'   => true,
+			),
+
+			// move comparison date and increase current minute
+			5 => array(
+				'current_timestamp' => strtotime( '2017-09-20 09:15:14' ),
+				'compare_timestamp' => strtotime( '2017-09-19 09:13:14' ),
+				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
+				'expected_result'   => false,
+			),
+
+			// move comparison date and decrease current minute
+			6 => array(
+				'current_timestamp' => strtotime( '2017-09-20 09:12:14' ),
+				'compare_timestamp' => strtotime( '2017-09-19 09:13:14' ),
+				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
+				'expected_result'   => true,
+			),
+
+			// move comparison date and increase current hour
+			7 => array(
+				'current_timestamp' => strtotime( '2017-09-20 10:13:14' ),
+				'compare_timestamp' => strtotime( '2017-09-19 09:13:14' ),
+				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
+				'expected_result'   => false,
+			),
+
+			// move comparison date and decrease current hour
+			8 => array(
+				'current_timestamp' => strtotime( '2017-09-20 08:13:14' ),
+				'compare_timestamp' => strtotime( '2017-09-19 09:13:14' ),
+				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
+				'expected_result'   => true,
+			),
+
+			// move comparison date, decrease hour and increase current second
+			9 => array(
+				'current_timestamp' => strtotime( '2017-09-20 09:13:14' ),
+				'compare_timestamp' => strtotime( '2017-09-19 08:13:14' ),
+				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
+				'expected_result'   => false,
+			),
+
+			// move comparison date, decrease hour and and decrease current second
+			10 => array(
+				'current_timestamp' => strtotime( '2017-09-20 09:13:13' ),
+				'compare_timestamp' => strtotime( '2017-09-19 08:13:14' ),
+				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
+				'expected_result'   => false,
+			),
+
+			// move comparison date, decrease hour and and increase current minute
+			11 => array(
+				'current_timestamp' => strtotime( '2017-09-20 09:15:14' ),
+				'compare_timestamp' => strtotime( '2017-09-19 08:13:14' ),
+				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
+				'expected_result'   => false,
+			),
+
+			// move comparison date, decrease hour and and decrease current minute
+			12 => array(
+				'current_timestamp' => strtotime( '2017-09-20 09:12:14' ),
+				'compare_timestamp' => strtotime( '2017-09-19 08:13:14' ),
+				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
+				'expected_result'   => false,
+			),
+
+			// move comparison date, decrease hour and and increase current hour
+			13 => array(
+				'current_timestamp' => strtotime( '2017-09-20 10:13:14' ),
+				'compare_timestamp' => strtotime( '2017-09-19 08:13:14' ),
+				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
+				'expected_result'   => false,
+			),
+
+			// move comparison date, decrease hour and set hour to just outside of 1 day (00:00:00)
+			14 => array(
+				'current_timestamp' => strtotime( '2017-09-20 08:13:14' ),
+				'compare_timestamp' => strtotime( '2017-09-19 08:13:14' ),
+				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
+				'expected_result'   => false,
+			),
+		);
+	}
+
+	/**
+	 * Make sure is_on_same_day() works
+	 *
+	 * @dataProvider provider_is_on_same_day
+	 * @group is_on_same_day
+	 */
+	public function test_is_on_same_day( $current_timestamp, $compare_timestamp, $start_timestamp, $expected_result ) {
+		$this->assertEquals( $expected_result, wcsr_is_on_same_day( $current_timestamp, $compare_timestamp, $start_timestamp ) );
+	}
 }
