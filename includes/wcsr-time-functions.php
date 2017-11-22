@@ -114,3 +114,31 @@ function wcsr_get_timestamps_between( $timestamps_to_check, $from_timestamp, $to
 
 	return $times;
 }
+
+
+/**
+ * Conditional check for whether a timestamp is on the same 24 hour block as another timestamp
+ *
+ * The catch is the "day" is not typical calendar day - it based on a 24 hour block from the $start_timestamp
+ *
+ * Uses the $start_timestamp to loop over and add DAY_IN_SECONDS to the time until it reaches the same 24 hour block as the $compare_timestamp
+ * This function then checks whether the $current_timestamp and the $compare_timestamp are within the same 24 hour block
+ *
+ * @param  int  $current_timestamp The current timestamp being checked
+ * @param  int  $compare_timestamp The timestamp used to check if the $current_timestamp is on the same 24 hour block
+ * @param  int  $start_timestamp  The start timestamp of the period (to calculate when the 24 hour blocks start)
+ * @return boolean true on same 24 hour block | false if not
+ */
+function wcsr_is_on_same_day( $current_timestamp, $compare_timestamp, $start_timestamp ) {
+	for ( $end_of_the_day = $start_timestamp; $end_of_the_day <= $compare_timestamp; $end_of_the_day += DAY_IN_SECONDS ) {
+		// The loop controls take care of incrementing the end day (3rd expression) until the day after the compare date (2nd expression), but we also want to set the start date so we do that here using the current value of end day (which will be the start day in the final iteration as the 3rd expression in the loop hasn't run yet)
+		$start_of_the_day = $end_of_the_day;
+	}
+
+	// Compare timestamp to see if it is within our ranges
+	if ( ( $current_timestamp >= $start_of_the_day ) && ( $current_timestamp < $end_of_the_day ) ) {
+		return true;
+	} else {
+		return false;
+	}
+}

@@ -222,7 +222,7 @@ class WCSR_Resource extends WC_Data {
 			$deactivation_time = isset( $deactivation_times[ $i ] ) ? $deactivation_times[ $i ] : $to_timestamp;
 
 			// skip over any days that are activated/deactivated on the same 24 hour block and have already been accounted for
-			if ( $i !== 0 && self::is_on_same_day( $deactivation_time, $deactivation_times[ $i - 1 ], $from_timestamp ) ) {
+			if ( $i !== 0 && wcsr_is_on_same_day( $deactivation_time, $deactivation_times[ $i - 1 ], $from_timestamp ) ) {
 				continue;
 			}
 
@@ -233,48 +233,21 @@ class WCSR_Resource extends WC_Data {
 			$days_active += $days_by_time;
 
 			// If days based on time is only 1 but it was "across a 24 hour block" we may need to adjust IF NOT accounted for already
-			if ( $days_by_time == 1 && ! self::is_on_same_day( $activation_time, $deactivation_time, $from_timestamp ) ) {
+			if ( $days_by_time == 1 && ! wcsr_is_on_same_day( $activation_time, $deactivation_time, $from_timestamp ) ) {
 
 				// handle situation if first activation crosses a 24 hour block
-				if ( $i == 0 && ! self::is_on_same_day( $activation_time, $deactivation_time, $from_timestamp ) ) {
+				if ( $i == 0 && ! wcsr_is_on_same_day( $activation_time, $deactivation_time, $from_timestamp ) ) {
 					$days_active += 1;
 				}
 
 				// if this activation didn't start on the same 24 hour block as previous activation it is safe to add an extra day
-				if ( $i !== 0 && ! self::is_on_same_day( $activation_time, $deactivation_times[ $i - 1 ], $from_timestamp ) ) {
+				if ( $i !== 0 && ! wcsr_is_on_same_day( $activation_time, $deactivation_times[ $i - 1 ], $from_timestamp ) ) {
 					$days_active += 1;
 				}
 			}
 		}
 
 		return $days_active;
-	}
-
-	/**
-	 * Conditional check for whether a timestamp is on the same 24 hour block as another timestamp
-	 *
-	 * The catch is the "day" is not typical calendar day - it based on a 24 hour block from the $start_timestamp
-	 *
-	 * Uses the $start_timestamp to loop over and add DAY_IN_SECONDS to the time until it reaches the same 24 hour block as the $compare_timestamp
-	 * This function then checks whether the $current_timestamp and the $compare_timestamp are within the same 24 hour block
-	 *
-	 * @param  int  $current_timestamp The current timestamp being checked
-	 * @param  int  $compare_timestamp The timestamp used to check if the $current_timestamp is on the same 24 hour block
-	 * @param  int  $start_timestamp  The start timestamp of the period (to calculate when the 24 hour blocks start)
-	 * @return boolean true on same 24 hour block | false if not
-	 */
-	protected static function is_on_same_day( $current_timestamp, $compare_timestamp, $start_timestamp ) {
-		for ( $end_of_the_day = $start_timestamp; $end_of_the_day <= $compare_timestamp; $end_of_the_day += DAY_IN_SECONDS ) {
-			// The loop controls take care of incrementing the end day (3rd expression) until the day after the compare date (2nd expression), but we also want to set the start date so we do that here using the current value of end day (which will be the start day in the final iteration as the 3rd expression in the loop hasn't run yet)
-			$start_of_the_day = $end_of_the_day;
-		}
-
-		// Compare timestamp to see if it is within our ranges
-		if ( ( $current_timestamp >= $start_of_the_day ) && ( $current_timestamp < $end_of_the_day ) ) {
-			return true;
-		} else {
-			return false;
-		}
 	}
 
 	/**
