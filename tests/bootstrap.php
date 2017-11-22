@@ -55,6 +55,7 @@ class WCSR_Unit_Tests_Bootstrap {
 
 		// Load relevant Resource plugin files
 		require_once( $this->plugin_dir . '/includes/wcsr-time-functions.php' );
+		require_once( $this->plugin_dir . '/includes/wcsr-renewal-functions.php' );
 		require_once( $this->plugin_dir . '/includes/class-wcsr-resource.php' );
 		require_once( $this->plugin_dir . '/includes/class-wcsr-resource-manager.php' );
 

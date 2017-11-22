@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Tests for WCSR_Resource_Manager_Test
+ * Tests for wcsr-renewal-functions.php API functions
  */
-class WCSR_Resource_Manager_Test extends WCSR_Unit_TestCase {
+class WCSR_Renewal_Functions_Test extends WCSR_Unit_TestCase {
 
 	protected static $product_total     = 9.00;
 	protected static $product_total_tax = 0.00;
@@ -70,8 +70,7 @@ class WCSR_Resource_Manager_Test extends WCSR_Unit_TestCase {
 		$line_item_mock->expects( $this->any() )->method( 'get_name' )->will( $this->returnValue( self::$product_name ) );
 
 		// mock the resource manager class and a resource object for sending to get_prorated_resource_line_item
-		$resource_manager_mock = $this->getMockBuilder( 'WCSR_Resource_Manager' )->setMethods( array( 'get_prorated_resource_line_item' ) )->disableOriginalConstructor()->getMock();
 
-		$this->assertEquals( $expected_result, $this->get_accessible_protected_method( 'WCSR_Resource_Manager', 'get_prorated_resource_line_item' )->invoke( $resource_manager_mock, $line_item_mock, $days_active_ratio ) );
+		$this->assertEquals( $expected_result, wcsr_get_prorated_line_item( $line_item_mock, $days_active_ratio ) );
 	}
 }
