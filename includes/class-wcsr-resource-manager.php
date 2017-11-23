@@ -169,7 +169,7 @@ class WCSR_Resource_Manager {
 
 		// Allow 3rd party code to perform their own proration or other logic just after we have prorate
 		if ( $is_prorated ) {
-			$renewal_order = apply_filters( 'wcsr_after_renewal_order_prorated', $renewal_order, $resource_ids );
+			$renewal_order = apply_filters( 'wcsr_after_renewal_order_prorated', $renewal_order, $resource_ids, $subscription );
 		}
 
 		return $renewal_order;
