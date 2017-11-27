@@ -43,10 +43,7 @@ function wcsr_get_active_days_ratio( $from_timestamp, $days_in_period, $days_act
 
 		if ( $days_left_in_period >= $days_in_billing_period ) {
 			$number_of_billing_periods++;
-		} elseif( $days_left_in_period < $days_in_billing_period ) { // days in period
-			$number_of_billing_periods += round( $days_left_in_period / $days_in_billing_period, 2 );
-			break;
-		} elseif ( $days_left_in_period < $days_in_billing_period ) { // days in period don't even reach the full first billing period
+		} elseif ( $days_left_in_period < $days_in_billing_period ) { // if the days left in the period are less then the days in the billing cycle - find the ratio of days left and days in billing period
 			$number_of_billing_periods += round( $days_left_in_period / $days_in_billing_period, 2 );
 			break;
 		}
