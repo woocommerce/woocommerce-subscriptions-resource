@@ -223,6 +223,26 @@ class WCSR_Time_Functions_Test extends WCSR_Unit_TestCase {
 				'billing_interval' => 1,
 				'expected_ratio'  => 0.99
 			),
+
+			// Jason's renewal test case - 12 day period, 13 days active, the ratio should account for 12 days because thats the days in period
+			21 => array(
+				'from_timestamp'   => '2017-09-14 14:21:40',
+				'days_in_period'   => 12,
+				'days_active'      => 13,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'   => 0.4
+			),
+
+			// 32 days active in a 31 days period from August (full month) - this test is not possible now that we have a safe guard so that the active days is never more than the days in period
+			22 => array(
+				'from_timestamp'   => '2017-08-14 14:21:40',
+				'days_in_period'   => 31,
+				'days_active'      => 32,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'   => 1
+			),
 		);
 	}
 
