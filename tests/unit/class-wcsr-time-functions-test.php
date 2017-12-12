@@ -203,6 +203,26 @@ class WCSR_Time_Functions_Test extends WCSR_Unit_TestCase {
 				'billing_interval' => 1,
 				'expected_ratio'  => 0 // the renewal came late so they should be charged 1 month + 1 day.
 			),
+
+			// monthly subscription, 17 day in period, 15 days active
+			19 => array(
+				'from_timestamp'   => '2017-11-11 10:24:40',
+				'days_in_period'   => 17,
+				'days_active'      => 15,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 0.5 // For Jasons recent renewal and prior the latest changes, this value was returning 0.88 as the days active ratio and the result from the line item 0.88 * $9.00 = $7.92
+			),
+
+			// a simple test to confirm the logic for minusing off the extra days can be replaced by: ( $days_active / $days_in_period ) * $number_of_billing_periods
+			20 => array(
+				'from_timestamp'   => '2017-09-14 10:24:40',
+				'days_in_period'   => 170, // just short of 6 months - extra days would've been ~140
+				'days_active'      => 30,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'  => 0.99
+			),
 		);
 	}
 
