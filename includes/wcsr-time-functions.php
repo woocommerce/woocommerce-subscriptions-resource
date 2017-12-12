@@ -57,15 +57,8 @@ function wcsr_get_active_days_ratio( $from_timestamp, $days_in_period, $days_act
 	if ( $days_active >= $days_in_period ) {
 		$active_days_ratio = $number_of_billing_periods;
 	} else {
-		// If there are more extra days in this cycle, then either the subscription has been suspended for one or more payments, or the more recent renewal order/s may have failed and the subscription has been manually reactivated, so we need to remove the extra days in the period to account for the extra days to make sure the ratio used to determine daily rates reflects the increased time period.
-		$extra_days_in_cycle = $days_in_period - ( $days_in_billing_cycle / $number_of_billing_periods );
-
-		// now that we have the exact amount of days in the billing cycle, we don't need to account for 2 days like the code example given in https://github.com/Prospress/woocommerce-subscriptions-resource/pull/16#issuecomment-344707347
-		if ( $extra_days_in_cycle >= 0 ) {
-			$days_in_period -= $extra_days_in_cycle;
-		}
-
-		$active_days_ratio = round( $days_active / $days_in_period, 2 );
+		// calculate the active days ratio for days active and days in period, then multiply that by the number of billing periods found between the from and to timestamp. This replaces the extra days in cycle logic because instead of finding the extra days and minusing that off the days in period, we can just multiply the result by the number of cycles.
+		$active_days_ratio = round( ( $days_active / $days_in_period ) * $number_of_billing_periods, 2 );
 	}
 
 	return $active_days_ratio;
