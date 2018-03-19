@@ -98,7 +98,7 @@ function wcsr_get_timestamps_between( $timestamps_to_check, $from_timestamp, $to
 
 	foreach ( $timestamps_to_check as $i => $timestamp ) {
 		if ( $timestamp >= $from_timestamp && $timestamp <= $to_timestamp ) {
-			$times[ $i ] = $timestamp;
+			$times[] = $timestamp;
 		}
 	}
 
