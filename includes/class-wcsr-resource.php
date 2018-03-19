@@ -222,7 +222,7 @@ class WCSR_Resource extends WC_Data {
 			$deactivation_time = isset( $deactivation_times[ $i ] ) ? $deactivation_times[ $i ] : $to_timestamp;
 
 			// skip over any days that are activated/deactivated on the same 24 hour block and have already been accounted for
-			if ( $i !== 0 && wcsr_is_on_same_day( $deactivation_time, $deactivation_times[ $i - 1 ], $from_timestamp ) ) {
+			if ( $i !== 0 && isset( $deactivation_times[ $i - 1 ] ) && wcsr_is_on_same_day( $deactivation_time, $deactivation_times[ $i - 1 ], $from_timestamp ) ) {
 				continue;
 			}
 
