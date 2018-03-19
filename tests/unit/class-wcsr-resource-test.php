@@ -412,6 +412,45 @@ class WCSR_Resource_Test extends WCSR_Unit_TestCase {
 				'deactivation_times'   => array(),
 				'expected_days_active' => 30,
 			),
+
+			// A test case testing a 6month old subscription with a store that has multiple activations/deactivations at the beginning then left active
+			31 => array(
+				'date_created'         => '2017-03-14 09:13:14',
+				'activation_times'     => array(
+					'2017-03-14 09:13:14', // 14th MAR
+					'2017-03-30 20:13:14', // 30th MAR
+					'2017-05-05 20:13:14', // 5th  MAY
+				),
+				'deactivation_times'   => array(
+					'2017-03-20 08:13:50', // 20th MAR
+					'2017-04-01 20:13:14', // 1st  APR
+				),
+				'expected_days_active' => 31,
+			),
+
+			// A test case testing a 6month old subscription with a store that has multiple activations/deactivations thoughout, including the current period
+			32 => array(
+				'date_created'         => '2017-03-14 09:13:14',
+				'activation_times'     => array(
+					'2017-03-14 09:13:14', // 14th MAR
+					'2017-03-30 20:13:14', // 30th MAR
+					'2017-05-05 20:13:14', // 5th  MAY
+					'2017-07-01 14:19:40', // 1st  JUL
+					'2017-07-05 14:19:40', // 5th  JUL
+					'2017-08-17 14:19:40', // 17th AUG
+					'2017-10-10 14:19:41', // 10th OCT (activated for 3 days)
+				),
+				'deactivation_times'   => array(
+					'2017-03-20 08:13:50', // 20th MAR
+					'2017-04-01 20:13:14', // 1st  APR
+					'2017-06-30 20:13:14', // 30th JUN
+					'2017-07-02 14:19:40', // 2nd  JUL
+					'2017-08-15 14:19:40', // 15th AUG
+					'2017-09-19 14:19:40', // 19th SEPT (deactivated for the first time 5/6 days into current period)
+					'2017-10-13 14:19:40', // 13th OCT
+				),
+				'expected_days_active' => 9,
+			),
 		);
 	}
 
