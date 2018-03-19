@@ -396,6 +396,22 @@ class WCSR_Resource_Test extends WCSR_Unit_TestCase {
 				'deactivation_times'   => array( '2017-09-16 10:13:14', '2017-09-18 10:13:14' ),
 				'expected_days_active' => 4,
 			),
+
+			// First activation timestamp in array falls out of current renewal period. This is testing the wcsr_get_timestamps_between() function returns `2017-09-15 09:13:14` as the 0th key
+			29 => array(
+				'date_created'         => '2017-07-14 09:13:14',
+				'activation_times'     => array( '2017-07-14 08:13:14', '2017-09-15 09:13:14' ),
+				'deactivation_times'   => array( '2017-10-14 09:14:02' ),
+				'expected_days_active' => 30,
+			),
+
+			// Test for an empty deactivated_timestamps[$i -1] value - this is an impossible case without a bug being in place, i.e you need activation_times[1] to be set with no deactivated_timestamps[0]. This should be impossible because activation_times[1] should never exist without at least deactivation_times[0] between two activation_times
+			30 => array(
+				'date_created'         => '2017-07-14 09:13:14',
+				'activation_times'     => array( 1 => '2017-09-15 09:13:14' ),
+				'deactivation_times'   => array(),
+				'expected_days_active' => 30,
+			),
 		);
 	}
 
