@@ -140,6 +140,12 @@ class WCSR_Resource_Manager {
 					// Calculate the usage and the ratio of active days vs days in the period
 					$days_active       = $resource->get_days_active( $from_timestamp, $to_timestamp );
 					$days_in_period    = wcsr_get_days_in_period( $from_timestamp, $to_timestamp );
+
+					// make sure the days active doesn't go over the amount of days in the period
+					if ( $days_active > $days_in_period ) {
+						$days_active = $days_in_period;
+					}
+
 					$days_active_ratio = wcsr_get_active_days_ratio( $from_timestamp, $days_in_period, $days_active, $subscription->get_billing_period(), $subscription->get_billing_interval() );
 
 					foreach ( $line_items as $line_item ) {
