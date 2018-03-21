@@ -8,6 +8,14 @@
 	stopOnFailure="false"
 	bootstrap="tests/bootstrap.php"
 	>
+	<filter>
+		<whitelist>
+			<directory>./</directory>
+			<exclude>
+				<directory>./tests</directory>
+			</exclude>
+		</whitelist>
+	</filter>
 	<testsuites>
 		<testsuite name="WooCommerce Subscriptions Resource">
 			<directory suffix=".php">./tests/unit</directory>
