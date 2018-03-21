@@ -3,7 +3,7 @@
 /**
  * Test the WCS_Retry class's public methods
  */
-class WCSR_Resource_Test extends PHPUnit_Framework_TestCase {
+class WCSR_Resource_Test extends WCSR_Unit_TestCase {
 
 	protected static $from_timestamp;
 
@@ -396,6 +396,69 @@ class WCSR_Resource_Test extends PHPUnit_Framework_TestCase {
 				'deactivation_times'   => array( '2017-09-16 10:13:14', '2017-09-18 10:13:14' ),
 				'expected_days_active' => 4,
 			),
+
+			// First activation timestamp in array falls out of current renewal period. This is testing the wcsr_get_timestamps_between() function returns `2017-09-15 09:13:14` as the 0th key
+			29 => array(
+				'date_created'         => '2017-07-14 09:13:14',
+				'activation_times'     => array( '2017-07-14 08:13:14', '2017-09-15 09:13:14' ),
+				'deactivation_times'   => array( '2017-10-14 09:14:02' ),
+				'expected_days_active' => 30,
+			),
+
+			// Test for an empty deactivated_timestamps[$i -1] value - this is an impossible case without a bug being in place, i.e you need activation_times[1] to be set with no deactivated_timestamps[0]. This should be impossible because activation_times[1] should never exist without at least deactivation_times[0] between two activation_times
+			30 => array(
+				'date_created'         => '2017-07-14 09:13:14',
+				'activation_times'     => array( 1 => '2017-09-15 09:13:14' ),
+				'deactivation_times'   => array(),
+				'expected_days_active' => 30,
+			),
+
+			// A test case testing a 6month old subscription with a store that has multiple activations/deactivations at the beginning then left active
+			31 => array(
+				'date_created'         => '2017-03-14 09:13:14',
+				'activation_times'     => array(
+					'2017-03-14 09:13:14', // 14th MAR
+					'2017-03-30 20:13:14', // 30th MAR
+					'2017-05-05 20:13:14', // 5th  MAY
+				),
+				'deactivation_times'   => array(
+					'2017-03-20 08:13:50', // 20th MAR
+					'2017-04-01 20:13:14', // 1st  APR
+				),
+				'expected_days_active' => 31,
+			),
+
+			// A test case testing a 6month old subscription with a store that has multiple activations/deactivations thoughout, including the current period
+			32 => array(
+				'date_created'         => '2017-03-14 09:13:14',
+				'activation_times'     => array(
+					'2017-03-14 09:13:14', // 14th MAR
+					'2017-03-30 20:13:14', // 30th MAR
+					'2017-05-05 20:13:14', // 5th  MAY
+					'2017-07-01 14:19:40', // 1st  JUL
+					'2017-07-05 14:19:40', // 5th  JUL
+					'2017-08-17 14:19:40', // 17th AUG
+					'2017-10-10 14:19:41', // 10th OCT (activated for 3 days)
+				),
+				'deactivation_times'   => array(
+					'2017-03-20 08:13:50', // 20th MAR
+					'2017-04-01 20:13:14', // 1st  APR
+					'2017-06-30 20:13:14', // 30th JUN
+					'2017-07-02 14:19:40', // 2nd  JUL
+					'2017-08-15 14:19:40', // 15th AUG
+					'2017-09-19 14:19:40', // 19th SEPT (deactivated for the first time 5/6 days into current period)
+					'2017-10-13 14:19:40', // 13th OCT
+				),
+				'expected_days_active' => 9,
+			),
+
+			// Tests for having 0 deactivation times between the from and to timestamps, and the second activation timestamp (at index 1) being the only timestamp within the from and to timestamps.
+			33 => array(
+				'date_created'         => '2017-08-14 09:13:14',
+				'activation_times'     => array( '2017-08-14 09:13:14', '2017-09-20 09:13:14' ),
+				'deactivation_times'   => array( '2017-09-01 09:13:14' ),
+				'expected_days_active' => 25,
+			),
 		);
 	}
 
@@ -420,156 +483,5 @@ class WCSR_Resource_Test extends PHPUnit_Framework_TestCase {
 		$resource_mock->expects( $this->any() )->method( 'get_deactivation_timestamps' )->will( $this->returnValue( $deactivation_times ) );
 
 		$this->assertEquals( $expected_days_active, $resource_mock->get_days_active( self::$from_timestamp, self::$to_timestamp ) );
-	}
-
-	/**
-	 * Provide data to whether timestamp is on same day
-	 */
-	public function provider_is_on_same_day() {
-		return array(
-
-			// Exactly start of same day 00:00:00
-			0 => array(
-				'current_timestamp' => strtotime( '2017-09-14 09:13:14' ),
-				'compare_timestamp' => strtotime( '2017-09-14 09:13:14' ),
-				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
-				'expected_result'   => true,
-			),
-
-			// Just within the same day 23:59:59
-			1 => array(
-				'current_timestamp' => strtotime( '2017-09-15 09:13:13' ),
-				'compare_timestamp' => strtotime( '2017-09-14 09:13:14' ),
-				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
-				'expected_result'   => true,
-			),
-
-			// start of the next day 00:00:00
-			2 => array(
-				'current_timestamp' => strtotime( '2017-09-15 09:13:14' ),
-				'compare_timestamp' => strtotime( '2017-09-14 09:13:14' ),
-				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
-				'expected_result'   => false,
-			),
-
-			// move comparison date and increase current second
-			3 => array(
-				'current_timestamp' => strtotime( '2017-09-20 09:13:14' ),
-				'compare_timestamp' => strtotime( '2017-09-19 09:13:14' ),
-				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
-				'expected_result'   => false,
-			),
-
-			// move comparison date and decrease current second
-			4 => array(
-				'current_timestamp' => strtotime( '2017-09-20 09:13:13' ),
-				'compare_timestamp' => strtotime( '2017-09-19 09:13:14' ),
-				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
-				'expected_result'   => true,
-			),
-
-			// move comparison date and increase current minute
-			5 => array(
-				'current_timestamp' => strtotime( '2017-09-20 09:15:14' ),
-				'compare_timestamp' => strtotime( '2017-09-19 09:13:14' ),
-				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
-				'expected_result'   => false,
-			),
-
-			// move comparison date and decrease current minute
-			6 => array(
-				'current_timestamp' => strtotime( '2017-09-20 09:12:14' ),
-				'compare_timestamp' => strtotime( '2017-09-19 09:13:14' ),
-				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
-				'expected_result'   => true,
-			),
-
-			// move comparison date and increase current hour
-			7 => array(
-				'current_timestamp' => strtotime( '2017-09-20 10:13:14' ),
-				'compare_timestamp' => strtotime( '2017-09-19 09:13:14' ),
-				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
-				'expected_result'   => false,
-			),
-
-			// move comparison date and decrease current hour
-			8 => array(
-				'current_timestamp' => strtotime( '2017-09-20 08:13:14' ),
-				'compare_timestamp' => strtotime( '2017-09-19 09:13:14' ),
-				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
-				'expected_result'   => true,
-			),
-
-			// move comparison date, decrease hour and increase current second
-			9 => array(
-				'current_timestamp' => strtotime( '2017-09-20 09:13:14' ),
-				'compare_timestamp' => strtotime( '2017-09-19 08:13:14' ),
-				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
-				'expected_result'   => false,
-			),
-
-			// move comparison date, decrease hour and and decrease current second
-			10 => array(
-				'current_timestamp' => strtotime( '2017-09-20 09:13:13' ),
-				'compare_timestamp' => strtotime( '2017-09-19 08:13:14' ),
-				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
-				'expected_result'   => false,
-			),
-
-			// move comparison date, decrease hour and and increase current minute
-			11 => array(
-				'current_timestamp' => strtotime( '2017-09-20 09:15:14' ),
-				'compare_timestamp' => strtotime( '2017-09-19 08:13:14' ),
-				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
-				'expected_result'   => false,
-			),
-
-			// move comparison date, decrease hour and and decrease current minute
-			12 => array(
-				'current_timestamp' => strtotime( '2017-09-20 09:12:14' ),
-				'compare_timestamp' => strtotime( '2017-09-19 08:13:14' ),
-				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
-				'expected_result'   => false,
-			),
-
-			// move comparison date, decrease hour and and increase current hour
-			13 => array(
-				'current_timestamp' => strtotime( '2017-09-20 10:13:14' ),
-				'compare_timestamp' => strtotime( '2017-09-19 08:13:14' ),
-				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
-				'expected_result'   => false,
-			),
-
-			// move comparison date, decrease hour and set hour to just outside of 1 day (00:00:00)
-			14 => array(
-				'current_timestamp' => strtotime( '2017-09-20 08:13:14' ),
-				'compare_timestamp' => strtotime( '2017-09-19 08:13:14' ),
-				'start_timestamp'   => strtotime( '2017-09-14 09:13:14' ),
-				'expected_result'   => false,
-			),
-		);
-	}
-
-	/**
-	 * Make sure is_on_same_day() works
-	 *
-	 * @dataProvider provider_is_on_same_day
-	 */
-	public function test_is_on_same_day( $current_timestamp, $compare_timestamp, $start_timestamp, $expected_result ) {
-		$resource_mock = $this->getMockBuilder( 'WCSR_Resource' )->disableOriginalConstructor()->getMock();
-
-		$actual_result = $this->get_accessible_protected_method( $resource_mock, 'is_on_same_day' )->invoke( $resource_mock, $current_timestamp, $compare_timestamp, $start_timestamp );
-		$this->assertEquals( $expected_result, $actual_result );
-	}
-
-	/**
-	 * A utility function to make certain methods public, useful for testing protected methods
-	 * that affect public APIs, but are not public to avoid use due to potential confusion
-	 */
-	protected function get_accessible_protected_method( $object, $method_name ) {
-		$reflected_object = new ReflectionClass( $object );
-		$reflected_method = $reflected_object->getMethod( $method_name );
-		$reflected_method->setAccessible( true );
-		return $reflected_method;
 	}
 }

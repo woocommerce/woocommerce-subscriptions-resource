@@ -125,57 +125,28 @@ class WCSR_Resource_Manager {
 				if ( ! empty( $resource ) && false === $resource->get_is_pre_paid() && $resource->get_is_prorated() && $resource->has_been_activated() ) {
 
 					// Calculate prorated payments from paid date to match how Subscriptions determine next payment dates.
-					if ( $subscription->get_time( 'last_order_date_paid' ) > 0 ) {
-						$from_timestamp = $subscription->get_time( 'last_order_date_paid' );
-					} elseif ( $subscription->get_time( 'last_order_date_completed' ) > 0 ) {
-						$from_timestamp = $subscription->get_time( 'last_order_date_completed' );
+					if ( $subscription->get_time( 'date_paid' ) > 0 ) {
+						$from_timestamp = $subscription->get_time( 'date_paid' );
+					} elseif ( $subscription->get_time( 'date_completed' ) > 0 ) {
+						$from_timestamp = $subscription->get_time( 'date_completed' );
 					} else {
 						// We can't use last order date created, because that will be the renewal order just created, so go straight to the subscrition start time
 						$from_timestamp = $subscription->get_time( 'date_created' );
 					}
 
 					$from_timestamp = apply_filters( 'wcsr_renewal_proration_from_timetamp', $from_timestamp, $subscription, $renewal_order, $resource );
+					$to_timestamp   = $renewal_order->get_date_created()->getTimestamp();
 
-					// Now add a prorated line item for each resource based on the resource's usage for this period
-					$days_in_period = wcs_estimate_periods_between( $from_timestamp, $renewal_order->get_date_created()->getTimestamp(), 'day', 'floor' );
-					$days_active    = $resource->get_days_active( $from_timestamp, $renewal_order->get_date_created()->getTimestamp() );
-					$days_active_ratio = ( $days_active >= $days_in_period ) ? 1 : $days_active / $days_in_period; // calculate the days active to days in period ratio. If the active days is more than the days in period make sure we return 1
+					// Calculate the usage and the ratio of active days vs days in the period
+					$days_active       = $resource->get_days_active( $from_timestamp, $to_timestamp );
+					$days_in_period    = wcsr_get_days_in_period( $from_timestamp, $to_timestamp );
+					$days_active_ratio = wcsr_get_active_days_ratio( $from_timestamp, $days_in_period, $days_active, $subscription->get_billing_period(), $subscription->get_billing_interval() );
 
 					foreach ( $line_items as $line_item ) {
 
-						$new_item = new WC_Order_Item_Product();
-
-						wcs_copy_order_item( $line_item, $new_item );
-
-						// Maybe prorate the totals
-						if ( $days_active != $days_in_period ) {
-							$taxes = $line_item->get_taxes();
-
-							foreach( $taxes as $total_type => $tax_values ) {
-								foreach( $tax_values as $tax_id => $tax_value ) {
-									$taxes[ $total_type ][ $tax_id ] = $tax_value * $days_active_ratio;
-								}
-							}
-
-							$new_item->set_props( array(
-								'subtotal'     => $line_item->get_subtotal() * $days_active_ratio,
-								'total'        => $line_item->get_total() * $days_active_ratio,
-								'subtotal_tax' => $line_item->get_subtotal_tax() * $days_active_ratio,
-								'total_tax'    => $line_item->get_total_tax() * $days_active_ratio,
-								'taxes'        => $taxes,
-							) );
-
-							$line_item_name = sprintf( '%s usage for %d of %d days.', $line_item->get_name(), $days_active, $days_in_period );
-
-						} else {
-
-							$line_item_name = $line_item->get_name();
-
-						}
-
-						$line_item_name = apply_filters( 'wcsr_renewal_line_item_name', $line_item_name, $resource, $line_item, $days_active, $days_in_period );
-
-						$new_item->set_name( $line_item_name );
+						// Now add a prorated line item for the resource based on the resource's usage for this period
+						$new_item = wcsr_get_prorated_line_item( $line_item, $days_active_ratio );
+						$new_item->set_name( wcsr_get_line_item_name( $new_item, $days_active, $days_in_period, $resource, $from_timestamp, $to_timestamp ) );
 
 						// Add item to order
 						$renewal_order->add_item( $new_item );
