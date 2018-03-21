@@ -451,6 +451,14 @@ class WCSR_Resource_Test extends WCSR_Unit_TestCase {
 				),
 				'expected_days_active' => 9,
 			),
+
+			// Tests for having 0 deactivation times between the from and to timestamps, and the second activation timestamp (at index 1) being the only timestamp within the from and to timestamps.
+			33 => array(
+				'date_created'         => '2017-08-14 09:13:14',
+				'activation_times'     => array( '2017-08-14 09:13:14', '2017-09-20 09:13:14' ),
+				'deactivation_times'   => array( '2017-09-01 09:13:14' ),
+				'expected_days_active' => 25,
+			),
 		);
 	}
 
