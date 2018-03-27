@@ -243,6 +243,16 @@ class WCSR_Time_Functions_Test extends WCSR_Unit_TestCase {
 				'billing_interval' => 1,
 				'expected_ratio'   => 1
 			),
+
+			// 0 days active days active
+			23 => array(
+				'from_timestamp'   => '2017-08-14 14:21:40',
+				'days_in_period'   => 31,
+				'days_active'      => 0,
+				'billing_period'   => 'month',
+				'billing_interval' => 1,
+				'expected_ratio'   => 0
+			),
 		);
 	}
 

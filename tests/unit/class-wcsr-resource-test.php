@@ -459,6 +459,14 @@ class WCSR_Resource_Test extends WCSR_Unit_TestCase {
 				'deactivation_times'   => array( '2017-09-01 09:13:14' ),
 				'expected_days_active' => 25,
 			),
+
+			// Tests for having 0 days active
+			34 => array(
+				'date_created'         => '2017-08-14 09:13:14',
+				'activation_times'     => array( '2017-08-14 09:13:14' ),
+				'deactivation_times'   => array( '2017-08-15 09:13:14' ),
+				'expected_days_active' => 0,
+			),
 		);
 	}
 
