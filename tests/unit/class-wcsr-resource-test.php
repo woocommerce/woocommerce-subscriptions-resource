@@ -484,4 +484,133 @@ class WCSR_Resource_Test extends WCSR_Unit_TestCase {
 
 		$this->assertEquals( $expected_days_active, $resource_mock->get_days_active( self::$from_timestamp, self::$to_timestamp ) );
 	}
+
+	/**
+	 * Provide data to test is active
+	 */
+	public function provider_is_active() {
+		return array(
+			// test the first renewal case.. i.e check that the $at_timestamp is the same as the first activation timestamp
+			0 => array(
+				'activation_times'   => array( '2017-09-14 09:13:14' ),
+				'deactivation_times' => array( '2017-10-14 11:01:40' ),
+				'at_timestamp'       => strtotime( '2017-09-14 09:13:14' ),
+				'expected_is_active' => true,
+			),
+
+			// active at time, but deactivate one day after $at_timestamp
+			1 => array(
+				'activation_times'   => array( '2018-07-20 09:13:14' ),
+				'deactivation_times' => array( '2018-08-19 11:01:40' ),
+				'at_timestamp'       => strtotime( '2018-08-18 09:13:14' ),
+				'expected_is_active' => true,
+			),
+
+			// Active for a day then deactivated for three months, then activated again. This test is checking in the middle of the two active periods whether
+			2 => array(
+				'activation_times'   => array( '2018-07-10 09:13:14', '2018-10-20 10:20:20' ),
+				'deactivation_times' => array( '2018-07-11 11:01:40', '2018-10-30 10:30:12' ),
+				'at_timestamp'       => strtotime( '2018-09-18 09:13:14' ),
+				'expected_is_active' => false,
+			),
+
+			// Active for a day then deactivated for three months, then activated again. This test is checking in the middle of the two active periods whether
+			3 => array(
+				'activation_times'   => array( '2018-07-20 09:13:14', '2018-10-20 10:20:20' ),
+				'deactivation_times' => array( '2018-07-21 11:01:40' ),
+				'at_timestamp'       => strtotime( '2018-08-18 09:13:14' ), // not active now, but will be active in two days
+				'expected_is_active' => false,
+			),
+
+			// Check if a resource is active at a specific time, when the resource has never been activated.
+			4 => array(
+				'activation_times'   => array(),
+				'deactivation_times' => array(),
+				'at_timestamp'       => strtotime( '2018-08-18 09:13:14' ), // not active now, but will be active in two days
+				'expected_is_active' => false,
+			),
+
+			// Check if a resource is active at the current time, when the resource has never been activated.
+			5 => array(
+				'activation_times'   => array(),
+				'deactivation_times' => array(),
+				'at_timestamp'       => null,
+				'expected_is_active' => false,
+			),
+
+			// Check if a resource is active at the current time, when the resource has never been deactivated.
+			6 => array(
+				'activation_times'   => array( '2017-07-20 09:13:14' ),
+				'deactivation_times' => array(),
+				'at_timestamp'       => null,
+				'expected_is_active' => true,
+			),
+
+			// Check if a resource is active at the current time, when the resource was activated for 1 minute in the past
+			7 => array(
+				'activation_times'   => array( '2017-07-20 09:13:14' ),
+				'deactivation_times' => array( '2017-07-20 09:14:50' ),
+				'at_timestamp'       => null,
+				'expected_is_active' => false,
+			),
+
+			// Check if a resource is active at time that is before it was even first activated
+			8 => array(
+				'activation_times'   => array( '2017-07-20 09:13:14' ),
+				'deactivation_times' => array( '2017-07-20 09:14:50' ),
+				'at_timestamp'       => strtotime( '2017-06-20 09:14:50' ),
+				'expected_is_active' => false,
+			),
+
+			// Check if a resource is active at some time in the future when the resource was only activated for 1 minute in the past
+			9 => array(
+				'activation_times'   => array( '2017-07-20 09:13:14' ),
+				'deactivation_times' => array( '2017-07-20 09:14:50' ),
+				'at_timestamp'       => strtotime( '2018-08-10 10:10:10' ),
+				'expected_is_active' => false,
+			),
+
+			// Test if a resource was active at the exact same time that it was deactivated
+			10 => array(
+				'activation_times'   => array( '2017-07-20 09:13:14' ),
+				'deactivation_times' => array( '2017-07-20 09:14:50' ),
+				'at_timestamp'       => strtotime( '2017-07-20 09:14:50' ),
+				'expected_is_active' => false,
+			),
+
+			// Test if a resource was active 1 second before it was deactivated
+			11 => array(
+				'activation_times'   => array( '2017-07-20 09:13:14' ),
+				'deactivation_times' => array( '2017-07-20 09:14:50' ),
+				'at_timestamp'       => strtotime( '2017-07-20 09:14:49' ),
+				'expected_is_active' => true,
+			),
+
+			// Check if a resource was active at time that is before it was even first activated
+			12 => array(
+				'activation_times'   => array( '2017-07-20 09:13:14' ),
+				'deactivation_times' => array(),
+				'at_timestamp'       => strtotime( '2017-06-20 09:14:50' ),
+				'expected_is_active' => false,
+			),
+		);
+	}
+
+	/**
+	 * Test case for $resource->is_active()
+	 *
+	 * @dataProvider provider_is_active
+	 */
+	public function test_is_active( $activation_times, $deactivation_times, $at_timestamp, $expected_is_active ) {
+		// Convert activation/deactivate dates to timestamps
+		$activation_times   = array_map( 'strtotime', $activation_times );
+		$deactivation_times = array_map( 'strtotime', $deactivation_times );
+
+		$resource_mock = $this->getMockBuilder( 'WCSR_Resource' )->setMethods( array( 'has_been_activated', 'get_activation_timestamps', 'get_deactivation_timestamps' ) )->disableOriginalConstructor()->getMock();
+		$resource_mock->expects( $this->any() )->method( 'has_been_activated' )->will( $this->returnValue( true ) );
+		$resource_mock->expects( $this->any() )->method( 'get_activation_timestamps' )->will( $this->returnValue( $activation_times ) );
+		$resource_mock->expects( $this->any() )->method( 'get_deactivation_timestamps' )->will( $this->returnValue( $deactivation_times ) );
+
+		$this->assertEquals( $expected_is_active, $resource_mock->is_active( $at_timestamp ) );
+	}
 }
