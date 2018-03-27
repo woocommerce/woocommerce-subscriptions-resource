@@ -263,6 +263,42 @@ class WCSR_Resource extends WC_Data {
 	}
 
 	/**
+	 * Based on a resource's activation and deactivation timestamps, determine if the resource is active.
+	 *
+	 * If a timestamp is given, this function will determine if the resource was active at a given time.
+	 *
+	 * @param int $at_timestamp
+	 * @return bool
+	 */
+	public function is_active( $at_timestamp = 0 ) {
+		$is_active = false;
+		$timestamp = ( empty( $at_timestamp ) ) ? time() : $at_timestamp;
+
+		if ( empty( $timestamp ) || false === $this->has_been_activated() ) {
+			return $is_active;
+		}
+
+		$activation_times   = $this->get_activation_timestamps();
+		$deactivation_times = $this->get_deactivation_timestamps();
+
+		foreach ( $activation_times as $i => $activation_time ) {
+			$deactivation_time = isset( $deactivation_times[ $i ] ) ? $deactivation_times[ $i ] : null;
+
+			if ( ! empty( $deactivation_time ) && ( $timestamp >= $activation_time ) && ( $timestamp < $deactivation_time ) ) {
+				$is_active = true;
+				break;
+			}
+
+			if ( empty( $deactivation_time ) && ( $timestamp >= $activation_time ) ) {
+				$is_active = true;
+				break;
+			}
+		}
+
+		return $is_active;
+	}
+
+	/**
 	 * Setters
 	 */
 
