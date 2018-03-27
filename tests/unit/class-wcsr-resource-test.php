@@ -46,7 +46,7 @@ class WCSR_Resource_Test extends WCSR_Unit_TestCase {
 			 */
 			1 => array(
 				'date_created'         => '2017-08-14 09:13:14', // 1 month prior to $from_timestamp
-				'activation_times'     => array(),
+				'activation_times'     => array( '2017-08-14 09:13:14' ),
 				'deactivation_times'   => array( '2017-09-23 11:13:40' ),
 				'expected_days_active' => 10,
 			),
@@ -163,7 +163,7 @@ class WCSR_Resource_Test extends WCSR_Unit_TestCase {
 			),
 
 			/*
-			 * Simulate an existing active resource that is active for full cycle
+			 * Simulate a resource that has never been activated or deactivated
 			 *
 			 * To test this requires a resource that is:
 			 * 0. created prior to the start of the period being checked ($creation_time < $from_timestamp)
@@ -173,7 +173,7 @@ class WCSR_Resource_Test extends WCSR_Unit_TestCase {
 				'date_created'         => '2017-08-14 09:13:14',
 				'activation_times'     => array(),
 				'deactivation_times'   => array(),
-				'expected_days_active' => 31,
+				'expected_days_active' => 0,
 			),
 
 			/*
