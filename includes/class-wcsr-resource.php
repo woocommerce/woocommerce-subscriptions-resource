@@ -205,8 +205,9 @@ class WCSR_Resource extends WC_Data {
 		$activation_times   = wcsr_get_timestamps_between( $this->get_activation_timestamps(), $from_timestamp, $to_timestamp );
 		$deactivation_times = wcsr_get_timestamps_between( $this->get_deactivation_timestamps(), $from_timestamp, $to_timestamp );
 
-		// if the first activation date is after the first deactivation date, make sure we prepend the start timestamp to act as the first "activated" date for the resource
-		if ( ! isset( $activation_times[0] ) || ( isset( $deactivation_times[0] ) && $activation_times[0] > $deactivation_times[0] ) ) {
+		// if the the first activation time isset and comes after the first deactivation time, make sure we prepend the start timestamp to act as the first "activated" date for the resource
+		// if the resource was active at $from_timestamp but doesn't have a first activation time, make sure we prepend the start timestamp to act as the first "activated" date for the resource
+		if ( ( $this->is_active( $from_timestamp ) && ! isset( $activation_times[0] ) || ( isset( $activation_times[0] ) && isset( $deactivation_times[0] ) && $activation_times[0] > $deactivation_times[0] ) ) ) {
 			$start_timestamp = ( $this->get_date_created()->getTimestamp() > $from_timestamp ) ? $this->get_date_created()->getTimestamp() : $from_timestamp;
 
 			// before setting the start timestamp as the created time or the $from_timestamp make sure the deactivation date doesn't come before it
