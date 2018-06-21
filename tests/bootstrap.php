@@ -62,6 +62,11 @@ class WCSR_Unit_Tests_Bootstrap {
 		// Load WooCommerce Subscription files
 		require_once( $this->modules_dir . '/woocommerce-subscriptions/includes/wcs-time-functions.php' );
 
+		// Manually Load WC_DateTime during test suite
+		if ( ! class_exists( 'WC_DateTime' ) ) {
+			require_once( $this->modules_dir . '/woocommerce-subscriptions/includes/libraries/class-wc-datetime.php' );
+		}
+
 		// Load relevant class aliases for PHPUnit 6 (ran on PHP v7.0+ in Travis)
 		if ( class_exists( 'PHPUnit\Runner\Version' ) && version_compare( PHPUnit\Runner\Version::id(), '6.0', '>=' ) ) {
 			class_alias( 'PHPUnit\Framework\TestCase', 'PHPUnit_Framework_TestCase' );
