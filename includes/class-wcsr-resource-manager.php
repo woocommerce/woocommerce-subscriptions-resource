@@ -154,6 +154,8 @@ class WCSR_Resource_Manager {
 						$new_item = wcsr_get_prorated_line_item( $line_item, $days_active_ratio );
 						$new_item->set_name( wcsr_get_line_item_name( $new_item, $days_active, $days_in_period, $resource, $from_timestamp, $to_timestamp ) );
 
+						$new_item = apply_filters( 'wcsr_prorated_line_item_for_resource', $new_item, $resource );
+
 						// Add item to order
 						$renewal_order->add_item( $new_item );
 
