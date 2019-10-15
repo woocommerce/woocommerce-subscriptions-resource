@@ -180,7 +180,7 @@ When prorating renewal amounts, the  resource object will check for the number o
 
 If the subscription has no date for the last paid order, then the from date will attempt to use the last order's creation date, and if that does not exist, the subscription's creation creation.
 
-If you are continuing to provide access to the resource even between when a payment is due and when it is processed, by using a plugin like [WooCommerce Subscriptions - Preserve Billing Schedule](https://github.com/Prospress/woocommerce-subscriptions-preserve-billing-schedule), this default behaviour will result in incorrectly prorated amounts. You would instead wish for proration to always be based on the date the last order was created.
+If you are continuing to provide access to the resource even between when a payment is due and when it is processed, by using a plugin like [WooCommerce Subscriptions - Preserve Billing Schedule](https://github.com/woocommerce/woocommerce-subscriptions-preserve-billing-schedule), this default behaviour will result in incorrectly prorated amounts. You would instead wish for proration to always be based on the date the last order was created.
 
 To achieve this, you can use the `'wcsr_renewal_proration_from_timetamp'` filter with a callback like this:
 
@@ -210,12 +210,5 @@ You can include it via Git Subtree merge, or using Composer.
 
 ## Reporting Issues
 
-If you find an problem or would like to request this library be extended, please [open a new Issue](https://github.com/Prospress/woocommerce-subscriptions-resource/issues/new).
+If you find an problem or would like to request this library be extended, please [open a new Issue](https://github.com/woocommerce/woocommerce-subscriptions-resource/issues/new).
 
----
-
-<p align="center">
-	<a href="https://prospress.com/">
-		<img src="https://cloud.githubusercontent.com/assets/235523/11986380/bb6a0958-a983-11e5-8e9b-b9781d37c64a.png" width="160">
-	</a>
-</p>
