@@ -88,6 +88,7 @@ function wcsr_get_impressions_line_item( $line_item, $nb_of_impressions, $resour
 
 
 	$new_item = new WC_Order_Item_Product();
+	$new_item->set_name( $name );
 	$new_item->set_product( $impression_product );
 	$new_item->set_quantity( $nb_of_impressions );
 	$new_item->apply_changes();

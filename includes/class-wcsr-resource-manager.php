@@ -22,6 +22,9 @@ class WCSR_Resource_Manager {
 		// Custom action that can be triggered by 3rd parties and/or middleware to create a resource on certain events
 		add_action( 'wcsr_create_resource', __CLASS__ . '::create_resource', 10, 4 );
 
+		// Custom action that can be triggered by 3rd parties and/or middleware to create a resource on certain events
+		add_action( 'wcsr_add_impressions', __CLASS__ . '::resource_add_impressions', 10, 2 );
+
 		// Custom action that can be triggered by 3rd parties and/or middleware to activate a resource
 		add_action( 'wcsr_activate_resource', __CLASS__ . '::activate_resource', 10, 1 );
 
@@ -49,6 +52,7 @@ class WCSR_Resource_Manager {
 		$args = wp_parse_args( $args, array(
 			'is_pre_paid'  => true,
 			'is_prorated'  => false,
+			'is_by_impressions'  => false,
 			'date_created' => gmdate( 'U' ),
 			)
 		);
@@ -86,6 +90,21 @@ class WCSR_Resource_Manager {
 		if ( $resource_id = WCSR_Data_Store::store()->get_resource_id_by_external_id( $external_id ) ) {
 			$resource = self::get_resource( $resource_id );
 			$resource->activate();
+			$resource->save();
+		}
+	}
+
+	/**
+	 * Add impressions for a resource linked to an external object, specified by ID.
+	 *
+	 * @param int
+	 * @param int
+	 * @return null
+	 */
+	public static function resource_add_impressions( $external_id, $nb_of_impressions ) {
+		if ( $resource_id = WCSR_Data_Store::store()->get_resource_id_by_external_id( $external_id ) ) {
+			$resource = self::get_resource( $resource_id );
+			$resource->add_impressions( $nb_of_impressions );
 			$resource->save();
 		}
 	}
