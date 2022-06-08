@@ -30,6 +30,9 @@ class WCSR_Resource_Manager {
 
 		// When a renewal payment is due, maybe prorate the line item amounts
 		add_filter( 'wcs_renewal_order_created', __CLASS__ . '::maybe_prorate_renewal', 100, 2 );
+
+		// When a renewal payment is due, maybe prorate the line item amounts
+		add_filter( 'wcs_renewal_order_created', __CLASS__ . '::maybe_add_impressions', 100, 2 );
 	}
 
 	/**
@@ -178,6 +181,53 @@ class WCSR_Resource_Manager {
 		// Allow 3rd party code to perform their own proration or other logic just after we have prorate
 		if ( $is_prorated ) {
 			$renewal_order = apply_filters( 'wcsr_after_renewal_order_prorated', $renewal_order, $resource_ids, $subscription );
+		}
+
+		return $renewal_order;
+	}
+
+	/**
+	 * When a renewal order is created, make sure line items for all resources reflect the amount of impressions.
+	 *
+	 * @param WC_Order
+	 * @param WC_Subscription
+	 */
+	public static function maybe_add_impressions( $renewal_order, $subscription ) {
+
+		$has_impressions_item = false;
+		$resource_ids = WCSR_Data_Store::store()->get_resource_ids_for_subscription( $subscription->get_id(), 'wcsr-unended' );
+
+		if ( ! empty( $resource_ids ) ) {
+
+			// First, get the line items representing the resource so we can figure out things like cost for it
+			$line_items = $renewal_order->get_items();
+
+			foreach ( $resource_ids as $resource_id ) {
+
+				$resource = self::get_resource( $resource_id );
+
+				if ( ! empty( $resource ) && $resource->get_is_by_impressions()  ) {
+
+					$nb_of_impressions = $resource->get_number_of_impressions();
+
+					foreach ( $line_items as $line_item ) {
+
+						// Now add a prorated line item for the resource based on the resource's usage for this period
+						$new_item = wcsr_get_impressions_line_item( $line_item, $nb_of_impressions, $resource_id );
+						$new_item = apply_filters( 'wcsr_impressions_line_item_for_resource', $new_item, $resource );
+
+						// Add item to order
+						$renewal_order->add_item( $new_item );
+
+						$has_impressions_item = true;
+					}
+				}
+			}
+		}
+
+		// Allow 3rd party code to perform their own proration or other logic just after we added the impressions
+		if ( $has_impressions_item ) {
+			$renewal_order = apply_filters( 'wcsr_after_renewal_order_with_impressions', $renewal_order, $resource_ids, $subscription );
 		}
 
 		return $renewal_order;
