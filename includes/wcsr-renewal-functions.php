@@ -91,7 +91,10 @@ function wcsr_get_impressions_line_item( $line_item, $nb_of_impressions, $resour
 	$new_item->set_name( $name );
 	$new_item->set_product( $impression_product );
 	$new_item->set_quantity( $nb_of_impressions );
+	$new_item->set_total( $impression_product->get_price() * $nb_of_impressions );
+	$new_item->set_subtotal( $impression_product->get_price() * $nb_of_impressions );
 	$new_item->apply_changes();
+	$new_item->save();
 	return $new_item;
 }
 
@@ -100,10 +103,10 @@ function wcsr_get_impressions_line_item( $line_item, $nb_of_impressions, $resour
  * @return mixed
  */
 function wcsr_get_product_for_impressions() {
-	$product = wc_get_product_id_by_sku( 'one_impression' );
+	$product_id = wc_get_product_id_by_sku( 'one_impression' );
 
-	if ( $product ) {
-		return $product;
+	if ( $product_id ) {
+		return  new \WC_Product( $product_id );
 	}
 
 	$product = new \WC_Product( null );
@@ -119,5 +122,5 @@ function wcsr_get_product_for_impressions() {
 	$product->set_regular_price( 1 );
 	$product->save();
 
-	return $product->get_id();
+	return $product;
 }

@@ -24,6 +24,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 		'subscription_id',
 		'activation_timestamps',
 		'deactivation_timestamps',
+		'impressions_number',
 	);
 
 	/**
@@ -156,7 +157,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 
 			'activation_timestamps'   => array_filter( (array) get_post_meta( $resource_id, 'activation_timestamps', true ) ),
 			'deactivation_timestamps' => array_filter( (array) get_post_meta( $resource_id, 'deactivation_timestamps', true ) ),
-			'impressions_number'      => wc_string_to_int( get_post_meta( $resource_id, 'impressions_number', true ) ),
+			'impressions_number'      => get_post_meta( $resource_id, 'impressions_number', true ),
 		) );
 
 		$resource->read_meta_data();
@@ -175,7 +176,6 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 
 		$resource->save_meta_data();
 		$changes = $resource->get_changes();
-
 		if ( array_intersect( array( 'date_created', 'status', 'subscription_id' ), array_keys( $changes ) ) ) {
 
 			$post_data = array(
@@ -312,7 +312,6 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 		);
 
 		$props_to_update = $this->get_props_to_update( $resource, $meta_key_to_props );
-
 		foreach ( $props_to_update as $meta_key => $prop ) {
 
 			$value = $resource->{"get_$prop"}( 'edit' );

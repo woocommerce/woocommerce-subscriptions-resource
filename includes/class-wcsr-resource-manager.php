@@ -66,6 +66,7 @@ class WCSR_Resource_Manager {
 
 		$resource->set_is_pre_paid( $args['is_pre_paid'] );
 		$resource->set_is_prorated( $args['is_prorated'] );
+		$resource->set_is_by_impressions( $args['is_by_impressions'] );
 		$resource->set_date_created( $args['date_created'] );
 
 		// If the resource is being created as an active resource, make sure its creation time is included in the activation timestamps
@@ -108,6 +109,22 @@ class WCSR_Resource_Manager {
 			$resource->save();
 		}
 	}
+
+	/**
+	 * Get impressions for a resource linked to an external object, specified by ID.
+	 *
+	 * @param int
+	 * @return int|null
+	 */
+	public static function resource_get_impressions( $external_id ) {
+		if ( $resource_id = WCSR_Data_Store::store()->get_resource_id_by_external_id( $external_id ) ) {
+			$resource = self::get_resource( $resource_id );
+			return $resource->get_impressions_number();
+		}
+
+		return null;
+	}
+
 
 	/**
 	 * Deactivate a resource linked to an external object, specified by ID.
@@ -227,7 +244,7 @@ class WCSR_Resource_Manager {
 
 				if ( ! empty( $resource ) && $resource->get_is_by_impressions()  ) {
 
-					$nb_of_impressions = $resource->get_number_of_impressions();
+					$nb_of_impressions = $resource->get_impressions_number();
 
 					foreach ( $line_items as $line_item ) {
 
@@ -241,6 +258,10 @@ class WCSR_Resource_Manager {
 						$has_impressions_item = true;
 					}
 				}
+
+				// Reset the nb of impressions for the period.
+				$resource->set_impressions_number( 0 );
+				$resource->save();
 			}
 		}
 
@@ -248,6 +269,8 @@ class WCSR_Resource_Manager {
 		if ( $has_impressions_item ) {
 			$renewal_order = apply_filters( 'wcsr_after_renewal_order_with_impressions', $renewal_order, $resource_ids, $subscription );
 		}
+
+		$renewal_order->calculate_totals(); // also saves the order
 
 		return $renewal_order;
 	}

@@ -132,10 +132,8 @@ class WCSR_Resource extends WC_Data {
 	 * @param int $nb_of_impressions_to_add
 	 */
 	public function add_impressions( $nb_of_impressions_to_add ) {
-
-		$nb_of_impressions = $this->get_number_of_impressions();
-
-		$this->set_number_of_impressions( $nb_of_impressions + $nb_of_impressions );
+		$nb_of_impressions = (int) $this->get_impressions_number();
+		$this->set_impressions_number( $nb_of_impressions_to_add + $nb_of_impressions );
 	}
 
 	/**
@@ -210,7 +208,7 @@ class WCSR_Resource extends WC_Data {
 	 * @param string $context
 	 * @return int
 	 */
-	public function get_number_of_impressions( $context = 'view' ) {
+	public function get_impressions_number( $context = 'view' ) {
 		return $this->get_prop( 'impressions_number', $context );
 	}
 
@@ -374,6 +372,15 @@ class WCSR_Resource extends WC_Data {
 	}
 
 	/**
+	 * Set whether the resource's is managing impressions.
+	 *
+	 * @param bool
+	 */
+	public function set_is_by_impressions( $is_by_impressions ) {
+		return $this->set_prop( 'is_by_impressions', (bool) $is_by_impressions );
+	}
+
+	/**
 	 * Set whether the resource's cost is prorated to the daily rate of its usage during each billing period.
 	 *
 	 * @param bool
@@ -405,7 +412,7 @@ class WCSR_Resource extends WC_Data {
 	 *
 	 * @param int $nb_of_impressions
 	 */
-	public function set_number_of_impressions( $nb_of_impressions ) {
+	public function set_impressions_number( $nb_of_impressions ) {
 		$this->set_prop( 'impressions_number', $nb_of_impressions );
 	}
 
