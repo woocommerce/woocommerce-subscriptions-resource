@@ -120,6 +120,8 @@ function wcsr_get_timestamps_between( $timestamps_to_check, $from_timestamp, $to
  * @return boolean true on same 24 hour block | false if not
  */
 function wcsr_is_on_same_day( $current_timestamp, $compare_timestamp, $start_timestamp ) {
+	$start_of_the_day = null;
+	
 	for ( $end_of_the_day = $start_timestamp; $end_of_the_day <= $compare_timestamp; $end_of_the_day += DAY_IN_SECONDS ) {
 		// The loop controls take care of incrementing the end day (3rd expression) until the day after the compare date (2nd expression), but we also want to set the start date so we do that here using the current value of end day (which will be the start day in the final iteration as the 3rd expression in the loop hasn't run yet)
 		$start_of_the_day = $end_of_the_day;
