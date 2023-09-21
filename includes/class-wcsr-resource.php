@@ -32,6 +32,8 @@ class WCSR_Resource extends WC_Data {
 		'is_prorated'             => false,
 		'activation_timestamps'   => array(),
 		'deactivation_timestamps' => array(),
+		'is_by_impressions'       => false,
+		'impressions_number'      => 0,
 	);
 
 	/**
@@ -94,6 +96,15 @@ class WCSR_Resource extends WC_Data {
 	}
 
 	/**
+	 * Check whether the resource's cost is impression-based during each billing period.
+	 *
+	 * @return bool
+	 */
+	public function get_is_by_impressions( $context = 'view' ) {
+		return $this->get_prop( 'is_by_impressions', $context );
+	}
+
+	/**
 	 * Record the resource's activation
 	 */
 	public function activate() {
@@ -113,6 +124,16 @@ class WCSR_Resource extends WC_Data {
 		$deactivation_timestamps[] = gmdate( 'U' );
 
 		$this->set_deactivation_timestamps( $deactivation_timestamps );
+	}
+
+	/**
+	 * Add impressions to the resource
+     *
+	 * @param int $nb_of_impressions_to_add
+	 */
+	public function add_impressions( $nb_of_impressions_to_add ) {
+		$nb_of_impressions = (int) $this->get_impressions_number();
+		$this->set_impressions_number( $nb_of_impressions_to_add + $nb_of_impressions );
 	}
 
 	/**
@@ -179,6 +200,16 @@ class WCSR_Resource extends WC_Data {
 	 */
 	public function get_deactivation_timestamps( $context = 'view' ) {
 		return $this->get_prop( 'deactivation_timestamps', $context );
+	}
+
+	/**
+	 * Get an array of timestamps on which this resource was deactivated
+	 *
+	 * @param string $context
+	 * @return int
+	 */
+	public function get_impressions_number( $context = 'view' ) {
+		return $this->get_prop( 'impressions_number', $context );
 	}
 
 	/**
@@ -341,6 +372,15 @@ class WCSR_Resource extends WC_Data {
 	}
 
 	/**
+	 * Set whether the resource's is managing impressions.
+	 *
+	 * @param bool
+	 */
+	public function set_is_by_impressions( $is_by_impressions ) {
+		return $this->set_prop( 'is_by_impressions', (bool) $is_by_impressions );
+	}
+
+	/**
 	 * Set whether the resource's cost is prorated to the daily rate of its usage during each billing period.
 	 *
 	 * @param bool
@@ -365,6 +405,15 @@ class WCSR_Resource extends WC_Data {
 	 */
 	public function set_deactivation_timestamps( $timestamps ) {
 		$this->set_prop( 'deactivation_timestamps', $timestamps );
+	}
+
+	/**
+	 * Set the number of impressions for this resource
+	 *
+	 * @param int $nb_of_impressions
+	 */
+	public function set_impressions_number( $nb_of_impressions ) {
+		$this->set_prop( 'impressions_number', $nb_of_impressions );
 	}
 
 	/**

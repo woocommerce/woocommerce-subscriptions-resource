@@ -24,6 +24,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 		'subscription_id',
 		'activation_timestamps',
 		'deactivation_timestamps',
+		'impressions_number',
 	);
 
 	/**
@@ -152,9 +153,11 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 
 			'is_pre_paid'             => wc_string_to_bool( get_post_meta( $resource_id, 'is_pre_paid', true ) ),
 			'is_prorated'             => wc_string_to_bool( get_post_meta( $resource_id, 'is_prorated', true ) ),
+			'is_by_impressions'       => wc_string_to_bool( get_post_meta( $resource_id, 'is_by_impressions', true ) ),
 
 			'activation_timestamps'   => array_filter( (array) get_post_meta( $resource_id, 'activation_timestamps', true ) ),
 			'deactivation_timestamps' => array_filter( (array) get_post_meta( $resource_id, 'deactivation_timestamps', true ) ),
+			'impressions_number'      => get_post_meta( $resource_id, 'impressions_number', true ),
 		) );
 
 		$resource->read_meta_data();
@@ -173,7 +176,6 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 
 		$resource->save_meta_data();
 		$changes = $resource->get_changes();
-
 		if ( array_intersect( array( 'date_created', 'status', 'subscription_id' ), array_keys( $changes ) ) ) {
 
 			$post_data = array(
@@ -303,12 +305,13 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 			'external_id'             => 'external_id',
 			'is_pre_paid'             => 'is_pre_paid',
 			'is_prorated'             => 'is_prorated',
+			'is_by_impressions'       => 'is_by_impressions',
 			'activation_timestamps'   => 'activation_timestamps',
 			'deactivation_timestamps' => 'deactivation_timestamps',
+			'impressions_number'      => 'impressions_number',
 		);
 
 		$props_to_update = $this->get_props_to_update( $resource, $meta_key_to_props );
-
 		foreach ( $props_to_update as $meta_key => $prop ) {
 
 			$value = $resource->{"get_$prop"}( 'edit' );
@@ -317,6 +320,7 @@ class WCSR_Resource_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object
 
 				case 'is_pre_paid' :
 				case 'is_prorated' :
+				case 'is_by_impressions' :
 					$updated = update_post_meta( $resource->get_id(), $meta_key, wc_bool_to_string( $value ) );
 					break;
 

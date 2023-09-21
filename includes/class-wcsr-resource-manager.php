@@ -22,6 +22,9 @@ class WCSR_Resource_Manager {
 		// Custom action that can be triggered by 3rd parties and/or middleware to create a resource on certain events
 		add_action( 'wcsr_create_resource', __CLASS__ . '::create_resource', 10, 4 );
 
+		// Custom action that can be triggered by 3rd parties and/or middleware to create a resource on certain events
+		add_action( 'wcsr_add_impressions', __CLASS__ . '::resource_add_impressions', 10, 2 );
+
 		// Custom action that can be triggered by 3rd parties and/or middleware to activate a resource
 		add_action( 'wcsr_activate_resource', __CLASS__ . '::activate_resource', 10, 1 );
 
@@ -30,6 +33,9 @@ class WCSR_Resource_Manager {
 
 		// When a renewal payment is due, maybe prorate the line item amounts
 		add_filter( 'wcs_renewal_order_created', __CLASS__ . '::maybe_prorate_renewal', 100, 2 );
+
+		// When a renewal payment is due, maybe prorate the line item amounts
+		add_filter( 'wcs_renewal_order_created', __CLASS__ . '::maybe_add_impressions', 100, 2 );
 	}
 
 	/**
@@ -46,6 +52,7 @@ class WCSR_Resource_Manager {
 		$args = wp_parse_args( $args, array(
 			'is_pre_paid'  => true,
 			'is_prorated'  => false,
+			'is_by_impressions'  => false,
 			'date_created' => gmdate( 'U' ),
 			)
 		);
@@ -59,6 +66,7 @@ class WCSR_Resource_Manager {
 
 		$resource->set_is_pre_paid( $args['is_pre_paid'] );
 		$resource->set_is_prorated( $args['is_prorated'] );
+		$resource->set_is_by_impressions( $args['is_by_impressions'] );
 		$resource->set_date_created( $args['date_created'] );
 
 		// If the resource is being created as an active resource, make sure its creation time is included in the activation timestamps
@@ -86,6 +94,37 @@ class WCSR_Resource_Manager {
 			$resource->save();
 		}
 	}
+
+	/**
+	 * Add impressions for a resource linked to an external object, specified by ID.
+	 *
+	 * @param int
+	 * @param int
+	 * @return null
+	 */
+	public static function resource_add_impressions( $external_id, $nb_of_impressions ) {
+		if ( $resource_id = WCSR_Data_Store::store()->get_resource_id_by_external_id( $external_id ) ) {
+			$resource = self::get_resource( $resource_id );
+			$resource->add_impressions( $nb_of_impressions );
+			$resource->save();
+		}
+	}
+
+	/**
+	 * Get impressions for a resource linked to an external object, specified by ID.
+	 *
+	 * @param int
+	 * @return int|null
+	 */
+	public static function resource_get_impressions( $external_id ) {
+		if ( $resource_id = WCSR_Data_Store::store()->get_resource_id_by_external_id( $external_id ) ) {
+			$resource = self::get_resource( $resource_id );
+			return $resource->get_impressions_number();
+		}
+
+		return null;
+	}
+
 
 	/**
 	 * Deactivate a resource linked to an external object, specified by ID.
@@ -179,6 +218,59 @@ class WCSR_Resource_Manager {
 		if ( $is_prorated ) {
 			$renewal_order = apply_filters( 'wcsr_after_renewal_order_prorated', $renewal_order, $resource_ids, $subscription );
 		}
+
+		return $renewal_order;
+	}
+
+	/**
+	 * When a renewal order is created, make sure line items for all resources reflect the amount of impressions.
+	 *
+	 * @param WC_Order
+	 * @param WC_Subscription
+	 */
+	public static function maybe_add_impressions( $renewal_order, $subscription ) {
+
+		$has_impressions_item = false;
+		$resource_ids = WCSR_Data_Store::store()->get_resource_ids_for_subscription( $subscription->get_id(), 'wcsr-unended' );
+
+		if ( ! empty( $resource_ids ) ) {
+
+			// First, get the line items representing the resource so we can figure out things like cost for it
+			$line_items = $renewal_order->get_items();
+
+			foreach ( $resource_ids as $resource_id ) {
+
+				$resource = self::get_resource( $resource_id );
+
+				if ( ! empty( $resource ) && $resource->get_is_by_impressions()  ) {
+
+					$nb_of_impressions = $resource->get_impressions_number();
+
+					foreach ( $line_items as $line_item ) {
+
+						// Now add a prorated line item for the resource based on the resource's usage for this period
+						$new_item = wcsr_get_impressions_line_item( $line_item, $nb_of_impressions, $resource_id );
+						$new_item = apply_filters( 'wcsr_impressions_line_item_for_resource', $new_item, $resource );
+
+						// Add item to order
+						$renewal_order->add_item( $new_item );
+
+						$has_impressions_item = true;
+					}
+				}
+
+				// Reset the nb of impressions for the period.
+				$resource->set_impressions_number( 0 );
+				$resource->save();
+			}
+		}
+
+		// Allow 3rd party code to perform their own proration or other logic just after we added the impressions
+		if ( $has_impressions_item ) {
+			$renewal_order = apply_filters( 'wcsr_after_renewal_order_with_impressions', $renewal_order, $resource_ids, $subscription );
+		}
+
+		$renewal_order->calculate_totals(); // also saves the order
 
 		return $renewal_order;
 	}

@@ -40,7 +40,7 @@ To create a new resource, trigger the `wcsr_create_resource` hook via `do_action
 1. `$status` (`string`):  the status for the resource at the time of creation. Should be either 'active' or 'inactive', unless using a custom resource class which can handle other statuses.
 1. `$external_id` (`int`):  the ID of the external object to link this resource to. For example, to link it to a _store_ on [Robot Ninja](http://robotninja.com/), the store's ID is passed as the `$external_id`.
 1. `$subscription_id` (`int`):  the ID of the subscription in WooCommerce to link this resource to.
-1. `$args` (`array`): A set of params to customise the behaviour of the resource, especially for proration and pre-pay vs. post pay. Default value: `array ( 'is_pre_paid'  => true, 'is_prorated'  => false )`.
+1. `$args` (`array`): A set of params to customise the behaviour of the resource, especially for proration and pre-pay vs. post pay. Default value: `array ( 'is_pre_paid'  => true, 'is_prorated'  => false, 'is_by_impressions' => true )`.
 
 #### Resource Creation Example  Code
 
@@ -80,6 +80,34 @@ To deactive a resource linked to a store with ID 23, the following code can be u
 
 ```
 do_action( 'wcsr_deactivate_resource', 23 );
+```
+
+
+### Add impressions to a Resource
+
+To record the number of impression of an existing resource, trigger the `wcsr_add_impressions` hook via `do_action()` and pass the following parameter:
+
+1. `$external_id` (`int`):  the ID of the external object to link this resource to. For example, to link it to a _store_ on [Robot Ninja](http://robotninja.com/), the store's ID is passed as the `$external_id`.
+1. `$nb_of_impressions` (`int`):  The number of impressions of the ad, for example
+
+This will record the resource's total impressions against the resource so that it can later be used, if required.
+
+#### Resource Activation Example  Code
+
+To active a resource linked to a store with ID 23, the following code can be used:
+
+```
+do_action( 'wcsr_add_impressions', 23, 2000 ); // Ad for the store 23 was shown 2000 times
+```
+
+### Price for one impression
+
+The price for one impression of a resource can be modified with the filter `wcsr_price_for_one_impression`.
+
+```
+add_filter( 'wcsr_price_for_one_impression', function ( $line_item, $nb_of_impressions, $resource_id ) {
+    return 0.001; // Returned price in current currency for ONE impression
+}, 10, 4 );
 ```
 
 ### Add custom line items or modify prorated totals
